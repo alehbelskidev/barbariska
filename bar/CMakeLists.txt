@@ -8,6 +8,7 @@ add_executable(bar
     src/wlr-layer-shell-unstable-v1-client-protocol.c
     src/xdg-shell-client-protocol.c
 	src/wayland-context.cpp
+	src/surface.cpp
 )
 
 target_include_directories(bar PRIVATE
