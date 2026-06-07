@@ -9,6 +9,7 @@ add_executable(bar
     src/xdg-shell-client-protocol.c
 	src/wayland-context.cpp
 	src/surface.cpp
+	src/shm-buffer.cpp
 )
 
 target_include_directories(bar PRIVATE
