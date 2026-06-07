@@ -22,3 +22,4 @@ AllowShortFunctionsOnASingleLine: None
 IndentCaseLabels: true
 
 PointerAlignment: Right
+AccessModifierOffset: -4
