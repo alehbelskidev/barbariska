@@ -46,7 +46,10 @@ public:
     Surface(wl_compositor *compositor, zwlr_layer_shell_v1 *layer_shell,
             int default_w, int default_h);
 
+    // Telling SURFACE which buffer to show and commit
+    // New pixels will be AVAILABLE for COMPOSER only after commit
     void commit(wl_buffer *buffer);
+
     Dimensions get_dimensions() const
     {
         return dimensions;

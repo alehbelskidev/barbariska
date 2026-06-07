@@ -52,8 +52,6 @@ Surface::Surface(wl_compositor *compositor, zwlr_layer_shell_v1 *layer_shell,
 
 void Surface::commit(wl_buffer *buffer)
 {
-    // Telling SURFACE which buffer to show and commit
-    // New pixels will be AVAILABLE for COMPOSER only after commit
     wl_surface_attach(surface, buffer, 0, 0);
     wl_surface_damage(surface, 0, 0, dimensions.bar_width,
                       dimensions.bar_height);
