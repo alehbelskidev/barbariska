@@ -5,10 +5,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-ShmBuffer::ShmBuffer(int bar_width, int bar_height, wl_shm *shm)
+ShmBuffer::ShmBuffer(Surface::Dimensions surface_dimensions, wl_shm *shm)
 {
-    stride = bar_width * 4;
-    shm_size = stride * bar_height;
+    stride = surface_dimensions.bar_width * 4;
+    shm_size = stride * surface_dimensions.bar_height;
 
     // shm_open creates anon file in RAM
     // COMPOSITOR and our process share this memory region
@@ -23,7 +23,8 @@ ShmBuffer::ShmBuffer(int bar_width, int bar_height, wl_shm *shm)
     // COMPOSITOR now knows about this memory region
     wl_shm_pool *pool = wl_shm_create_pool(shm, fd, shm_size);
 
-    buffer = wl_shm_pool_create_buffer(pool, 0, bar_width, bar_height, stride,
+    buffer = wl_shm_pool_create_buffer(pool, 0, surface_dimensions.bar_width,
+                                       surface_dimensions.bar_height, stride,
                                        WL_SHM_FORMAT_ARGB8888);
 
     // pool is useless after creating buffer

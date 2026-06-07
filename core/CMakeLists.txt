@@ -2,7 +2,7 @@ add_library(core STATIC
     src/wayland-context.cpp
     src/surface.cpp
     src/shm-buffer.cpp
-    # src/renderer.cpp
+    src/renderer.cpp
 	src/wlr-layer-shell-unstable-v1-client-protocol.c
     src/xdg-shell-client-protocol.c
 )

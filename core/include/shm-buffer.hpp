@@ -1,5 +1,6 @@
 #pragma once
 
+#include "surface.hpp"
 #include "wlr-layer-shell-unstable-v1-client-protocol.h"
 
 /// SHM buffer pipeline:
@@ -18,7 +19,7 @@ private:
     int shm_size;
 
 public:
-    ShmBuffer(int bar_width, int bar_height, wl_shm *shm);
+    ShmBuffer(Surface::Dimensions surface_dimensions, wl_shm *shm);
     ~ShmBuffer();
 
     void *get_shm_data() const
