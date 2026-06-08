@@ -1,5 +1,3 @@
-#include <cairo/cairo.h>
-
 #include "renderer.hpp"
 #include "shm-buffer.hpp"
 #include "surface.hpp"
