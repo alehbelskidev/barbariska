@@ -6,6 +6,7 @@
 
 #include "surface.hpp"
 
+namespace Core {
 using CommitFn = std::function<void()>;
 
 class Renderer {
@@ -28,3 +29,4 @@ public:
     void draw_bg(Surface::Dimensions surface_dimensions);
     void draw_test();
 };
+}  // namespace Core

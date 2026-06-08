@@ -5,14 +5,15 @@
 
 int main()
 {
-    WaylandContext wctx;
-    Surface surface(wctx.get_compositor(), wctx.get_layer_shell(), 1920, 30);
+    Core::WaylandContext wctx;
+    Core::Surface surface(wctx.get_compositor(), wctx.get_layer_shell(), 1920,
+                          30);
 
     wctx.roundtrip();
 
     auto surface_dimensions = surface.get_dimensions();
-    ShmBuffer shm_buffer(surface_dimensions, wctx.get_shm());
-    Renderer r(
+    Core::ShmBuffer shm_buffer(surface_dimensions, wctx.get_shm());
+    Core::Renderer r(
         surface_dimensions, shm_buffer.get_shm_data(), shm_buffer.get_stride(),
         [&surface, &shm_buffer]() { surface.commit(shm_buffer.get_buffer()); });
 

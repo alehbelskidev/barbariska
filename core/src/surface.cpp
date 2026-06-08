@@ -2,25 +2,9 @@
 
 #include <iostream>
 
-void Surface::layer_surface_configure_cb(void *data,
-                                         zwlr_layer_surface_v1 *layer_surface,
-                                         uint32_t serial, uint32_t width,
-                                         uint32_t height)
-{
-    auto *surface = static_cast<Surface *>(data);
-    zwlr_layer_surface_v1_ack_configure(layer_surface, serial);
-    surface->dimensions.bar_width = width;
-    surface->dimensions.bar_height = height;
-}
-
-void Surface::layer_surface_closed_cb(void *data,
-                                      zwlr_layer_surface_v1 *layer_surface)
-{
-    std::cout << "layer surface closed\n";
-}
-
-Surface::Surface(wl_compositor *compositor, zwlr_layer_shell_v1 *layer_shell,
-                 int default_w, int default_h)
+Core::Surface::Surface(wl_compositor *compositor,
+                       zwlr_layer_shell_v1 *layer_shell, int default_w,
+                       int default_h)
 {
     dimensions = {
         .bar_width = default_w,
@@ -50,7 +34,23 @@ Surface::Surface(wl_compositor *compositor, zwlr_layer_shell_v1 *layer_shell,
     wl_surface_commit(surface);
 }
 
-void Surface::commit(wl_buffer *buffer)
+void Core::Surface::layer_surface_configure_cb(
+    void *data, zwlr_layer_surface_v1 *layer_surface, uint32_t serial,
+    uint32_t width, uint32_t height)
+{
+    auto *surface = static_cast<Surface *>(data);
+    zwlr_layer_surface_v1_ack_configure(layer_surface, serial);
+    surface->dimensions.bar_width = width;
+    surface->dimensions.bar_height = height;
+}
+
+void Core::Surface::layer_surface_closed_cb(
+    void *data, zwlr_layer_surface_v1 *layer_surface)
+{
+    std::cout << "layer surface closed\n";
+}
+
+void Core::Surface::commit(wl_buffer *buffer)
 {
     wl_surface_attach(surface, buffer, 0, 0);
     wl_surface_damage(surface, 0, 0, dimensions.bar_width,

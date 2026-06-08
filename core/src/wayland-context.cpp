@@ -2,9 +2,10 @@
 
 #include <iostream>
 
-void WaylandContext::registry_global_cb(void *data, wl_registry *reg,
-                                        uint32_t name, const char *interface,
-                                        uint32_t version)
+void Core::WaylandContext::registry_global_cb(void *data, wl_registry *reg,
+                                              uint32_t name,
+                                              const char *interface,
+                                              uint32_t version)
 {
     auto *ctx = static_cast<WaylandContext *>(data);
     // Comparing interface names and biding what we need
@@ -23,12 +24,13 @@ void WaylandContext::registry_global_cb(void *data, wl_registry *reg,
     }
 }
 
-void WaylandContext::registry_global_remove_cb(void *data, wl_registry *reg,
-                                               uint32_t name)
+void Core::WaylandContext::registry_global_remove_cb(void *data,
+                                                     wl_registry *reg,
+                                                     uint32_t name)
 {
 }
 
-WaylandContext::WaylandContext()
+Core::WaylandContext::WaylandContext()
 {
     // Opening COMPOSITOR connection through WAYLAND_DISPLAY from env,
     // usually wayland-1? doubt it
@@ -53,17 +55,17 @@ WaylandContext::WaylandContext()
     std::cout << "All interfaces bound\n";
 }
 
-WaylandContext::~WaylandContext()
+Core::WaylandContext::~WaylandContext()
 {
     wl_display_disconnect(display);
 }
 
-void WaylandContext::roundtrip()
+void Core::WaylandContext::roundtrip()
 {
     wl_display_roundtrip(display);
 }
 
-bool WaylandContext::should_dispatch()
+bool Core::WaylandContext::should_dispatch()
 {
     return wl_display_dispatch(display) != -1;
 }
