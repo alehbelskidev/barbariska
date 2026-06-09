@@ -1,14 +1,14 @@
 #include "renderer.hpp"
 
 Core::Renderer::Renderer(Surface::Dimensions surface_dimensions, void *shm_data,
-                         int stride, CommitFn on_commit)
+                         int stride, CommitFn commit_cb)
+    : on_commit(commit_cb)
 {
     cairo_surface = cairo_image_surface_create_for_data(
         static_cast<unsigned char *>(shm_data), CAIRO_FORMAT_ARGB32,
         surface_dimensions.bar_width, surface_dimensions.bar_height, stride);
 
     cr = cairo_create(cairo_surface);
-    on_commit = on_commit;
 }
 
 Core::Renderer::~Renderer()

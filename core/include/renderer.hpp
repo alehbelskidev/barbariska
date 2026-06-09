@@ -23,7 +23,7 @@ private:
 
 public:
     Renderer(Surface::Dimensions surface_dimensions, void *shm_data, int stride,
-             CommitFn on_commit);
+             CommitFn commit_cb);
     ~Renderer();
 
     void draw_bg(Surface::Dimensions surface_dimensions);

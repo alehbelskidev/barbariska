@@ -36,7 +36,7 @@ Core::WaylandContext::WaylandContext()
     // usually wayland-1? doubt it
     display = wl_display_connect(nullptr);
     if (!display) {
-        std::cerr << "Failed to connect to wayland\n";
+        std::cerr << "ERROR: Failed to connect to wayland\n";
     }
 
     // Getting registry and attaching listener to get all available interfaces
@@ -49,7 +49,7 @@ Core::WaylandContext::WaylandContext()
     wl_display_roundtrip(display);
 
     if (!compositor || !shm || !layer_shell) {
-        std::cerr << "Required interfaces not available\n";
+        std::cerr << "ERROR: Required interfaces not available\n";
     }
 
     std::cout << "All interfaces bound\n";
