@@ -3,6 +3,7 @@ add_library(core STATIC
     src/surface.cpp
     src/shm-buffer.cpp
     src/renderer.cpp
+	src/client.cpp
 	src/wlr-layer-shell-unstable-v1-client-protocol.c
     src/xdg-shell-client-protocol.c
 )

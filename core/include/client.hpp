@@ -20,7 +20,7 @@ private:
 
 public:
     Client(UpdateFn update_cb);
-    virtual ~Client() = default;
+    virtual ~Client();
 };
 
 }  // namespace Core
