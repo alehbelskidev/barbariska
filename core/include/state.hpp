@@ -4,7 +4,8 @@
 
 #include <cstdint>
 
-#define SHM_PATH "/dev/shm/barbariska"
+#define BARBARISKA_SHM_PATH "/dev/shm/barbariska"
+#define BARBARISKA_SOCKET_PATH "/run/user/%d/barbariska.sock"
 #define MAX_HYPR_WS_AMOUNT 10
 
 namespace Core {

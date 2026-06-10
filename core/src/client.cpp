@@ -11,7 +11,7 @@
 Core::Client::Client(UpdateFn update_cb)
     : on_update(update_cb), shm_state(nullptr)
 {
-    int fd = open(SHM_PATH, O_RDONLY, 0600);
+    int fd = open(BARBARISKA_SHM_PATH, O_RDONLY, 0600);
     if (fd == -1) {
         std::cerr << "ERROR: Failed to open barbariska shared mem region\n";
         return;
@@ -44,7 +44,7 @@ void Core::Client::listen()
 void Core::Client::notify(Command cmd)
 {
     char path[108];
-    snprintf(path, sizeof(path), "/run/user/%d/barbariska.sock", getuid());
+    snprintf(path, sizeof(path), BARBARISKA_SOCKET_PATH, getuid());
 
     int fd = socket(AF_LOCAL, SOCK_STREAM | SOCK_CLOEXEC, 0);
 

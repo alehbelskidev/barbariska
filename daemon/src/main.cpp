@@ -1,5 +1,7 @@
 #include <csignal>
+#include <iostream>
 
+#include "socket.hpp"
 #include "state.hpp"
 
 static bool running = true;
@@ -11,13 +13,18 @@ void on_signal(int)
 
 int main()
 {
-    Core::State state;
     signal(SIGTERM, on_signal);
     signal(SIGINT, on_signal);
 
+    Core::State state;
+    Socket bsock([](const Core::Command *cmd) {
+        std::cout << "Reading from sock example " << cmd->type << "\n";
+    });
+
     while (running) {
         // ...
+        bsock.listenb();
     }
 
-    return 0;  // деструкторы вызовутся
+    return 0;
 }
