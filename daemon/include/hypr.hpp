@@ -7,13 +7,6 @@
 
 #include "state.hpp"
 
-// "/dispatch workspace %d"
-// j/activewindow
-// j/workspaces
-// j/activeworkspace
-
-using UpdateHyprStateFn = std::function<void(Core::Hypr &)>;
-
 enum HyprGetCommand {
     GET_ACTIVE_WORKSPACE,
     GET_WORKSPACES,
@@ -26,8 +19,10 @@ enum HyprDispatchCommand {
 
 class Hypr {
 private:
+    Core::Hypr &state;
+    std::function<void()> triggerv;
+
     int fd;
-    UpdateHyprStateFn on_update;
     struct sockaddr_un addr;
     struct sockaddr_un addr2;
 
@@ -35,8 +30,13 @@ private:
     void command(HyprGetCommand cmd, char jsonstr[2048]);
     void dispatch_workspace_change(int id);
 
+    void update_active_window(char w[108]);
+    void update_active_workspace(int id);
+    void create_workspace(int id);
+    void destroy_workspace(int id);
+
 public:
-    Hypr(UpdateHyprStateFn update_cb);
+    Hypr(Core::Hypr &state, std::function<void()> triggerv);
     ~Hypr();
 
     void listen();

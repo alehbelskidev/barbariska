@@ -1,3 +1,4 @@
+#include "client.hpp"
 #include "renderer.hpp"
 #include "shm-buffer.hpp"
 #include "surface.hpp"
@@ -16,6 +17,9 @@ int main()
     Core::Renderer r(
         surface_dimensions, shm_buffer.get_shm_data(), shm_buffer.get_stride(),
         [&surface, &shm_buffer]() { surface.commit(shm_buffer.get_buffer()); });
+
+    r.draw_bg(surface_dimensions);
+    r.draw_test();
 
     while (wctx.should_dispatch()) {
     }
