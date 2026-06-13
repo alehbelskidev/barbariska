@@ -9,7 +9,7 @@
 #define MAX_HYPR_WS_AMOUNT 10
 
 namespace Core {
-enum ErrorCode { UNKNOWN };
+enum ErrorCode { UNKNOWN_ERR, NO_ERR };
 
 struct HyprWorkspace {
     int id;

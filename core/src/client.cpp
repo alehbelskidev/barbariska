@@ -17,12 +17,12 @@ Core::Client::Client(UpdateFn update_cb)
         return;
     }
 
-    shm_state = static_cast<State *>(
-        mmap(nullptr, sizeof(State), PROT_READ, MAP_SHARED, fd, 0));
-
-    if (shm_state) {
+    void *res = mmap(nullptr, sizeof(State), PROT_READ, MAP_SHARED, fd, 0);
+    if (res == MAP_FAILED) {
         std::cerr << "ERROR: Failed to map barbariska shared mem region\n";
         shm_state = nullptr;
+    } else {
+        shm_state = static_cast<State *>(res);
     }
 
     close(fd);
