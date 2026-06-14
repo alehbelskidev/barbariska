@@ -22,13 +22,19 @@ private:
     cairo_t *cr;
     CommitFn on_commit;
 
+    Surface::Dimensions surface_dimensions;
+    /// Holding ref on state
+    State &state;
+
+    void draw_bg();
+    void draw_test();
+    void flush();
+
 public:
-    Renderer(Surface::Dimensions surface_dimensions, void *shm_data, int stride,
-             CommitFn commit_cb);
+    Renderer(void *shm_data, CommitFn commit_cb,
+             Surface::Dimensions surface_dimensions, int stride, State &state);
     ~Renderer();
 
-    void draw_bg(Surface::Dimensions surface_dimensions);
-    void draw_test(State *state);
-    void flush();
+    void render();
 };
 }  // namespace Core

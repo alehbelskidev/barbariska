@@ -18,6 +18,7 @@ int main()
 {
     signal(SIGTERM, on_signal);
     signal(SIGINT, on_signal);
+    signal(SIGPIPE, SIG_IGN);
 
     Core::State state;
 
@@ -42,7 +43,7 @@ int main()
 
         if (fds[0].revents & POLLIN) bsock.notif_poll_events();
         if (fds[1].revents & POLLIN) hypr.poll_events();
-        if (fds[2].revents & POLLIN) bsock.accept_client();
+        if (fds[2].revents & POLLIN) bsock.accept_client(state);
     }
 
     return 0;

@@ -4,7 +4,8 @@
 
 Core::Surface::Surface(wl_compositor *compositor,
                        zwlr_layer_shell_v1 *layer_shell, int default_w,
-                       int default_h)
+                       int default_h, std::function<void()> on_configure_cb)
+    : on_configure(on_configure_cb)
 {
     dimensions = {
         .bar_width = default_w,
@@ -42,6 +43,7 @@ void Core::Surface::layer_surface_configure_cb(
     zwlr_layer_surface_v1_ack_configure(layer_surface, serial);
     surface->dimensions.bar_width = width;
     surface->dimensions.bar_height = height;
+    surface->on_configure();
 }
 
 void Core::Surface::layer_surface_closed_cb(
@@ -52,6 +54,7 @@ void Core::Surface::layer_surface_closed_cb(
 
 void Core::Surface::commit(wl_buffer *buffer)
 {
+    std::cout << "COMMIT TRIGGERED\n";
     wl_surface_attach(surface, buffer, 0, 0);
     wl_surface_damage(surface, 0, 0, dimensions.bar_width,
                       dimensions.bar_height);

@@ -89,10 +89,11 @@ void BSocket::notif_poll_events()
     close(clientfd);
 }
 
-void BSocket::accept_client()
+void BSocket::accept_client(Core::State &state)
 {
     int clientfd = accept(readfd, nullptr, nullptr);
     if (clientfd == -1) return;
+    write(clientfd, &state, sizeof(state));
     clientfds.push_back(clientfd);
 }
 

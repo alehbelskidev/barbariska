@@ -30,7 +30,7 @@ public:
     ~BSocket();
 
     void notif_poll_events();
-    void accept_client();
+    void accept_client(Core::State &state);
     void broadcast(Core::State &state);
 
     int get_readfd() const

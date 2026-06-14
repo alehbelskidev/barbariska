@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 
 #include "wlr-layer-shell-unstable-v1-client-protocol.h"
 
@@ -27,6 +28,8 @@ private:
     // for now hardcode
     Dimensions dimensions;
 
+    std::function<void()> on_configure;
+
     // COMPOSITOR sends `configure` with real sizes when ready to show
     // `surface`.
     static void layer_surface_configure_cb(void *data,
@@ -45,7 +48,8 @@ private:
 
 public:
     Surface(wl_compositor *compositor, zwlr_layer_shell_v1 *layer_shell,
-            int default_w, int default_h);
+            int default_w, int default_h,
+            std::function<void()> on_configure_cb);
 
     // Telling SURFACE which buffer to show and commit
     // New pixels will be AVAILABLE for COMPOSER only after commit

@@ -1,8 +1,9 @@
 #include "renderer.hpp"
 
-Core::Renderer::Renderer(Surface::Dimensions surface_dimensions, void *shm_data,
-                         int stride, CommitFn commit_cb)
-    : on_commit(commit_cb)
+Core::Renderer::Renderer(void *shm_data, CommitFn commit_cb,
+                         Surface::Dimensions surface_dimensions, int stride,
+                         State &state)
+    : on_commit(commit_cb), surface_dimensions(surface_dimensions), state(state)
 {
     cairo_surface = cairo_image_surface_create_for_data(
         static_cast<unsigned char *>(shm_data), CAIRO_FORMAT_ARGB32,
@@ -24,7 +25,7 @@ void Core::Renderer::flush()
     on_commit();
 }
 
-void Core::Renderer::draw_bg(Surface::Dimensions surface_dimensions)
+void Core::Renderer::draw_bg()
 {
     cairo_set_source_rgba(cr, 0.1, 0.1, 0.1, 0);
     cairo_paint(cr);
@@ -34,12 +35,19 @@ void Core::Renderer::draw_bg(Surface::Dimensions surface_dimensions)
                     surface_dimensions.bar_height);
     cairo_fill(cr);
 }
-void Core::Renderer::draw_test(State *state)
+void Core::Renderer::draw_test()
 {
     cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
     cairo_select_font_face(cr, "monospace", CAIRO_FONT_SLANT_NORMAL,
                            CAIRO_FONT_WEIGHT_NORMAL);
     cairo_set_font_size(cr, 14.0);
     cairo_move_to(cr, 15, 18);
-    cairo_show_text(cr, state->hypr.active_window);
+    cairo_show_text(cr, state.hypr.active_window);
+}
+
+void Core::Renderer::render()
+{
+    draw_bg();
+    draw_test();
+    flush();
 }

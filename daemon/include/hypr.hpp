@@ -41,6 +41,9 @@ private:
     void create_workspace(int id);
     void destroy_workspace(int id);
 
+    /// initialize hypr state. Should be called explicitely
+    void init_hypr_state();
+
 public:
     Hypr(Core::Hypr &state, std::function<void()> triggerv);
     ~Hypr();
@@ -49,8 +52,6 @@ public:
     void poll_events();
     /// commands to hypr socket
     void command(HyprDispatchCommand cmd, int id);
-    /// initialize hypr state. Should be called explicitely
-    void init_hypr_state();
 
     int get_fd() const
     {
