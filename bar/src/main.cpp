@@ -20,38 +20,17 @@ int main()
     Core::Renderer r(
         surface_dimensions, shm_buffer.get_shm_data(), shm_buffer.get_stride(),
         [&surface, &shm_buffer]() { surface.commit(shm_buffer.get_buffer()); });
-    Core::Client c([&r, &surface_dimensions](Core::State *state) {
-        std::cout << "on_update: " << state->hypr.active_window << "\n";
-        r.draw_bg(surface_dimensions);
-        r.draw_test(state);
-        r.flush();
-    });
+    // Core::Client c([&r, &surface_dimensions](Core::State *state) {
+    //     r.draw_bg(surface_dimensions);
+    //     r.draw_test(state);
+    //     r.flush();
+    // });
 
     r.draw_bg(surface_dimensions);
-    r.draw_test(c.get_state());
-
-    auto print_state = [&c]() {
-        const Core::State *s = c.get_state();
-        std::cout << "version: " << s->version << "\n";
-        std::cout << "hypr.active_window: " << s->hypr.active_window << "\n";
-        std::cout << "hypr.active_wsid: " << s->hypr.active_wsid << "\n";
-        std::cout << "hypr.ws_count: " << s->hypr.ws_count << "\n";
-        for (int i = 0; i < s->hypr.ws_count; i++) {
-            std::cout << "hypr.wss[" << i << "].id: " << s->hypr.wss[i].id
-                      << "\n";
-            std::cout << "hypr.wss[" << i << "].name: " << s->hypr.wss[i].name
-                      << "\n";
-        }
-        std::cout << "network.essid: " << s->network.essid << "\n";
-        std::cout << "network.dmb: " << s->network.dmb << "\n";
-        std::cout << "network.connected: " << s->network.connected << "\n";
-        std::cout << std::endl;
-    };
-
-    print_state();
+    // r.draw_test(c.get_state());
 
     while (wctx.should_dispatch()) {
-        c.listen();
+        // c.listen();
     }
 
     return 0;

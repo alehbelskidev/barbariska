@@ -67,15 +67,7 @@ void Core::WaylandContext::roundtrip()
     wl_display_roundtrip(display);
 }
 
-// bool Core::WaylandContext::should_dispatch()
-//{
-//     return wl_display_dispatch(display) != -1;
-// }
 bool Core::WaylandContext::should_dispatch()
 {
-    struct pollfd pfd = {wl_display_get_fd(display), POLLIN, 0};
-    wl_display_flush(display);
-    poll(&pfd, 1, 16);
-    wl_display_dispatch_pending(display);
-    return true;
+    return wl_display_dispatch(display) != -1;
 }

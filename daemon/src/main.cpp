@@ -3,9 +3,8 @@
 #include <csignal>
 #include <iostream>
 
+#include "bsocket.hpp"
 #include "hypr.hpp"
-#include "shm.hpp"
-#include "socket.hpp"
 #include "state.hpp"
 
 static bool running = true;
@@ -19,31 +18,31 @@ int main()
 {
     signal(SIGTERM, on_signal);
     signal(SIGINT, on_signal);
-    Shm shm;
+
     Core::State state;
-    Socket sock([](const Core::Command *cmd) {
-        std::cout << "Reading from sock example " << cmd->type << "\n";
+
+    BSocket bsock([](const Core::Command &cmd) {
+        std::cout << "Reading from sock example " << cmd.type << "\n";
     });
-    Hypr hypr(state.hypr, [&state, &shm]() {
+    Hypr hypr(state.hypr, [&state, &bsock]() {
         state.version++;
-        shm.write(state);
-        std::cout << "SHM write: version=" << state.version
-                  << " window=" << state.hypr.active_window << "\n";
+        bsock.broadcast(state);
     });
 
-    std::cout << "State " << state.hypr.active_window << "\n";
-
-    pollfd fds[2];
-    fds[0].fd = sock.get_fd();
+    pollfd fds[3];
+    fds[0].fd = bsock.get_notiffd();
     fds[0].events = POLLIN;
     fds[1].fd = hypr.get_fd();
     fds[1].events = POLLIN;
+    fds[2].fd = bsock.get_readfd();
+    fds[2].events = POLLIN;
 
     while (running) {
-        poll(fds, 2, -1);
+        poll(fds, 3, -1);
 
-        if (fds[0].revents & POLLIN) sock.poll_events();
+        if (fds[0].revents & POLLIN) bsock.notif_poll_events();
         if (fds[1].revents & POLLIN) hypr.poll_events();
+        if (fds[2].revents & POLLIN) bsock.accept_client();
     }
 
     return 0;

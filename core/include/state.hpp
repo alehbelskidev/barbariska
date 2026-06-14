@@ -4,8 +4,11 @@
 
 #include <cstdint>
 
-#define BARBARISKA_SHM_PATH "/dev/shm/barbariska"
-#define BARBARISKA_SOCKET_PATH "/run/user/%d/barbariska.sock"
+/// For clients to read from daemon
+#define BARBARISKA_SOCKET_READ "/run/user/%d/barbariska_read.sock"
+/// For daemon to receive notifications from clients
+#define BARBARISKA_SOCKET_NOTIF "/run/user/%d/barbariska_notif.sock"
+
 #define MAX_HYPR_WS_AMOUNT 10
 
 namespace Core {
