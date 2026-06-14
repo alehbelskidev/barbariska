@@ -9,7 +9,7 @@
 #include <iostream>
 
 Core::Client::Client(UpdateFn update_cb)
-    : on_update(update_cb), shm_state(nullptr)
+    : on_update(update_cb), shm_state(nullptr), version(0)
 {
     int fd = open(BARBARISKA_SHM_PATH, O_RDONLY, 0600);
     if (fd == -1) {
@@ -36,8 +36,11 @@ Core::Client::~Client()
 void Core::Client::listen()
 {
     if (!shm_state) return;
+    std::cout << "listen: shm version=" << shm_state->version
+              << " local version=" << version << "\n";
     if (shm_state->version > version) {
-        on_update(*shm_state);
+        version = shm_state->version;
+        on_update(shm_state);
     }
 }
 

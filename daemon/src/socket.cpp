@@ -39,7 +39,7 @@ Socket::Socket(UpdateFn update_cb) : on_update(update_cb)
         return;
     }
 
-    fcntl(fd, F_SETFL, O_NONBLOCK);
+    fcntl(fd, F_SETFL);
 }
 
 Socket::~Socket()
@@ -50,10 +50,10 @@ Socket::~Socket()
         std::cerr << "D_ERROR: Failed to unlink barbariska.sock\n";
 }
 
-void Socket::listenb()
+void Socket::poll_events()
 {
-    socklen_t peer_addr_size;
     struct sockaddr_un peer_addr;
+    socklen_t peer_addr_size = sizeof(peer_addr);
     int cfd = accept(fd, (struct sockaddr *)&peer_addr, &peer_addr_size);
 
     if (cfd == -1) {

@@ -2,6 +2,7 @@
 
 #include "state.hpp"
 
+/// Shared memory for application state
 class Shm {
 private:
     int fd;
@@ -10,5 +11,6 @@ private:
 public:
     Shm();
     ~Shm();
+    /// write to shared state
     void write(const Core::State &state);
 };

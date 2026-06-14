@@ -33,15 +33,13 @@ void Core::Renderer::draw_bg(Surface::Dimensions surface_dimensions)
     cairo_rectangle(cr, 0, 0, surface_dimensions.bar_width,
                     surface_dimensions.bar_height);
     cairo_fill(cr);
-    flush();
 }
-void Core::Renderer::draw_test()
+void Core::Renderer::draw_test(State *state)
 {
     cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
     cairo_select_font_face(cr, "monospace", CAIRO_FONT_SLANT_NORMAL,
                            CAIRO_FONT_WEIGHT_NORMAL);
     cairo_set_font_size(cr, 14.0);
     cairo_move_to(cr, 15, 18);
-    cairo_show_text(cr, "Hello World");
-    flush();
+    cairo_show_text(cr, state->hypr.active_window);
 }

@@ -20,5 +20,9 @@ public:
     Socket(UpdateFn update_cb);
     ~Socket();
 
-    void listenb();
+    void poll_events();
+    int get_fd() const
+    {
+        return fd;
+    }
 };

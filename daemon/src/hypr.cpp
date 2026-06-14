@@ -25,7 +25,7 @@ void Hypr::init_socket()
         return;
     }
 
-    fcntl(fd, F_SETFL, O_NONBLOCK);
+    fcntl(fd, F_SETFL);
 }
 
 void Hypr::update_active_window(char w[108])
@@ -74,7 +74,7 @@ void Hypr::destroy_workspace(int id)
     state.ws_count = write_idx;
 }
 
-void Hypr::listen()
+void Hypr::poll_events()
 {
     size_t bufsize = 4096;
     char buf[bufsize];
@@ -90,6 +90,8 @@ void Hypr::listen()
             *end = '\0';
 
             char event_t[64], arg[108];
+
+            std::cout << "event: " << event_t << ", arg: " << arg << "\n";
 
             int res_count = sscanf(line, "%63[^>]>>%107[^\n]", event_t, arg);
 
