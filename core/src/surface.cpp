@@ -54,7 +54,6 @@ void Core::Surface::layer_surface_closed_cb(
 
 void Core::Surface::commit(wl_buffer *buffer)
 {
-    std::cout << "COMMIT TRIGGERED\n";
     wl_surface_attach(surface, buffer, 0, 0);
     wl_surface_damage(surface, 0, 0, dimensions.bar_width,
                       dimensions.bar_height);

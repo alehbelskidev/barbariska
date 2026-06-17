@@ -21,20 +21,21 @@ struct Theme {
 // const char *homedir = getenv("HOME");
 // snprintf(path, size, "%s%s", homedir, configdir);
 
-struct Widget {
-    enum Module { LEFT, CENTER, RIGHT } placement;
-    enum WidgetType {
-        WORKSPACES,
-        WINDOW,
-        CLOCK,
-        WIFI,
-        VOLUME,
-        DISKS,
-        PROC,
-        RAM,
-        SYSTEM
-    } type;
+enum class WidgetType {
+    WORKSPACES,
+    WINDOW,
+    CLOCK,
+    WIFI,
+    VOLUME,
+    DISKS,
+    PROC,
+    RAM,
+    SYSTEM,
+    UNKNOWN,
+};
 
+struct Widget {
+    WidgetType t;
     double gap, roundness;
     bool hoverable;
     Math::Vec2 padding;
@@ -52,6 +53,8 @@ private:
 
     void parse_font();
     void parse_theme();
+    Widget parse_widget(std::string key);
+    void parse_modules(std::vector<Widget> &target, std::string tkey);
 
 public:
     Config();
@@ -65,4 +68,6 @@ public:
     {
         return theme;
     }
+
+    void _DEBUG_print() const;
 };

@@ -27,6 +27,7 @@ int main()
     int efd = eventfd(0, EFD_CLOEXEC);
 
     Config config;
+    config._DEBUG_print();
     Core::State state;
     strncpy(state.hypr.active_window, "", 108);
     Core::WaylandContext wctx;
