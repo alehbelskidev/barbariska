@@ -17,24 +17,20 @@ private:
     /// dimensions Cairo draws into that memory - shm_data, COMPOSITOR reads
     /// from same region as - buffer
     cairo_surface_t *cairo_surface;
+    CommitFn on_commit;
+
+protected:
+    Surface::Dimensions surface_dimensions;
     /// cr - is a pen.
     /// shm always synced
     cairo_t *cr;
-    CommitFn on_commit;
-
-    Surface::Dimensions surface_dimensions;
     /// Holding ref on state
     State &state;
-
-    void draw_bg();
-    void draw_test();
     void flush();
 
 public:
     Renderer(void *shm_data, CommitFn commit_cb,
              Surface::Dimensions surface_dimensions, int stride, State &state);
-    ~Renderer();
-
-    void render();
+    virtual ~Renderer();
 };
 }  // namespace Core

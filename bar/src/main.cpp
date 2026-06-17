@@ -6,8 +6,8 @@
 #include <csignal>
 #include <iostream>
 
+#include "bar-renderer.hpp"
 #include "client.hpp"
-#include "renderer.hpp"
 #include "shm-buffer.hpp"
 #include "surface.hpp"
 #include "wayland-context.hpp"
@@ -26,6 +26,7 @@ int main()
 
     int efd = eventfd(0, EFD_CLOEXEC);
 
+    Config config;
     Core::State state;
     strncpy(state.hypr.active_window, "", 108);
     Core::WaylandContext wctx;
@@ -39,10 +40,10 @@ int main()
 
     auto surface_dimensions = surface.get_dimensions();
     Core::ShmBuffer shm_buffer(surface_dimensions, wctx.get_shm());
-    Core::Renderer r(
+    BarRenderer r(
         shm_buffer.get_shm_data(),
         [&surface, &shm_buffer]() { surface.commit(shm_buffer.get_buffer()); },
-        surface_dimensions, shm_buffer.get_stride(), state);
+        surface_dimensions, shm_buffer.get_stride(), state, config);
 
     Core::Client c([&state, efd](Core::State &new_state) {
         state = new_state;
@@ -65,7 +66,7 @@ int main()
         if (fds[1].revents & POLLIN) {
             uint64_t val;
             read(efd, &val, sizeof(val));
-            r.render();
+            r.draw();
             wl_display_flush(wctx.get_display());
             wl_display_dispatch_pending(wctx.get_display());
         }

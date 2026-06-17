@@ -24,30 +24,3 @@ void Core::Renderer::flush()
     cairo_surface_flush(cairo_surface);
     on_commit();
 }
-
-void Core::Renderer::draw_bg()
-{
-    cairo_set_source_rgba(cr, 0.1, 0.1, 0.1, 0);
-    cairo_paint(cr);
-
-    cairo_set_source_rgba(cr, 0.8, 0.2, 0.2, 1.0);
-    cairo_rectangle(cr, 0, 0, surface_dimensions.bar_width,
-                    surface_dimensions.bar_height);
-    cairo_fill(cr);
-}
-void Core::Renderer::draw_test()
-{
-    cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
-    cairo_select_font_face(cr, "monospace", CAIRO_FONT_SLANT_NORMAL,
-                           CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size(cr, 14.0);
-    cairo_move_to(cr, 15, 18);
-    cairo_show_text(cr, state.hypr.active_window);
-}
-
-void Core::Renderer::render()
-{
-    draw_bg();
-    draw_test();
-    flush();
-}
