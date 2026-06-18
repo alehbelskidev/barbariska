@@ -67,7 +67,17 @@ int main()
         if (fds[1].revents & POLLIN) {
             uint64_t val;
             read(efd, &val, sizeof(val));
-            r.draw();
+
+            auto theme = config.get_theme();
+            r.draw_rect(
+                Shapes::Rect{.x = 0,
+                             .y = 0,
+                             .width = (double)surface_dimensions.bar_width,
+                             .height = (double)surface_dimensions.bar_height},
+                theme.bg);
+            r.draw_text(state.hypr.active_window, theme.fg);
+            r.draw_finish();
+
             wl_display_flush(wctx.get_display());
             wl_display_dispatch_pending(wctx.get_display());
         }

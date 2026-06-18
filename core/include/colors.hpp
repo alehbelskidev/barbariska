@@ -4,7 +4,7 @@
 #include <string>
 #include <string_view>
 
-namespace UI {
+namespace Colors {
 struct RGBA {
     double r = 0, g = 0, b = 0, a = 1;
 
@@ -29,4 +29,4 @@ struct RGBA {
     {
     }
 };
-};  // namespace UI
+};  // namespace Colors

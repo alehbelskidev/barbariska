@@ -84,9 +84,9 @@ void Config::parse_font()
 
 void Config::parse_theme()
 {
-    theme.bg = UI::RGBA(t["theme"]["bg"].value_or("#000000"sv));
-    theme.fg = UI::RGBA(t["theme"]["fg"].value_or("#ffffff"sv));
-    theme.accent = UI::RGBA(t["theme"]["accent"].value_or("#000fff"sv));
+    theme.bg = Colors::RGBA(t["theme"]["bg"].value_or("#000000"sv));
+    theme.fg = Colors::RGBA(t["theme"]["fg"].value_or("#ffffff"sv));
+    theme.accent = Colors::RGBA(t["theme"]["accent"].value_or("#000fff"sv));
 }
 
 Widget Config::parse_widget(std::string key)
@@ -113,7 +113,7 @@ Widget Config::parse_widget(std::string key)
     }
 
     w.gap = section["gap"].value_or(0);
-    w.roundness = section["roundness"].value_or(0);
+    w.roundness = section["roundness"].value_or(0.0);
     w.hoverable = section["hover"].value_or(false);
     w.padding = Math::Vec2{.x = section["padding"]["x"].value_or(0.0),
                            .y = section["padding"]["y"].value_or(0.0)};

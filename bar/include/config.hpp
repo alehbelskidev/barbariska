@@ -16,7 +16,7 @@ struct Font {
 };
 
 struct Theme {
-    UI::RGBA bg, fg, accent;
+    Colors::RGBA bg, fg, accent;
 };
 // const char *homedir = getenv("HOME");
 // snprintf(path, size, "%s%s", homedir, configdir);

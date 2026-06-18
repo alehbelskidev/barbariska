@@ -2,14 +2,12 @@
 
 #include "config.hpp"
 #include "renderer.hpp"
+#include "shapes.hpp"
 #include "surface.hpp"
 
 class BarRenderer : public Core::Renderer {
 private:
     Config &config;
-
-    void draw_bg();
-    void draw_text();
 
 public:
     BarRenderer(void *shm_data, Core::CommitFn commit_cb,
@@ -21,5 +19,12 @@ public:
     }
     ~BarRenderer() = default;
 
-    void draw();
+    void draw_rect(Shapes::Rect r, Colors::RGBA bg);
+    void draw_text(char *text, Colors::RGBA fg);
+
+    /// Should always been call last!!!
+    void draw_finish()
+    {
+        flush();
+    }
 };
