@@ -1,7 +1,7 @@
 #pragma once
 
-namespace Math {
-struct Vec2 {
+namespace core {
+struct V2 {
     double x, y;
 };
-};  // namespace Math
+};  // namespace core

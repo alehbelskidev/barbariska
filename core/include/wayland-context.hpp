@@ -4,7 +4,7 @@
 
 #include "wlr-layer-shell-unstable-v1-client-protocol.h"
 
-namespace Core {
+namespace core {
 class WaylandContext {
 private:
     ///----PROTOCOL OBJECTS(interfaces)
@@ -70,4 +70,4 @@ public:
         return layer_shell;
     }
 };
-}  // namespace Core
+}  // namespace core

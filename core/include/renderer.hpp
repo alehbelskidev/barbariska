@@ -4,10 +4,13 @@
 
 #include <functional>
 
+#include "colors.hpp"
+#include "font.hpp"
+#include "shapes.hpp"
 #include "state.hpp"
 #include "surface.hpp"
 
-namespace Core {
+namespace core {
 using CommitFn = std::function<void()>;
 
 class Renderer {
@@ -20,7 +23,7 @@ private:
     CommitFn on_commit;
 
 protected:
-    Surface::Dimensions surface_dimensions;
+    core::Surface::Dimensions surface_dimensions;
     /// cr - is a pen.
     /// shm always synced
     cairo_t *cr;
@@ -30,7 +33,17 @@ protected:
 
 public:
     Renderer(void *shm_data, CommitFn commit_cb,
-             Surface::Dimensions surface_dimensions, int stride, State &state);
+             core::Surface::Dimensions surface_dimensions, int stride,
+             State &state);
     virtual ~Renderer();
+
+    void draw_rect(core::Rect r, core::RGBA bg);
+    void draw_text(char *text, core::Font font, core::RGBA fg);
+
+    /// Should always been call last!!!
+    void draw_finish()
+    {
+        flush();
+    }
 };
-}  // namespace Core
+}  // namespace core

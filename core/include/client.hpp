@@ -7,7 +7,7 @@
 
 #include "state.hpp"
 
-namespace Core {
+namespace core {
 
 using UpdateFn = std::function<void(State &)>;
 
@@ -34,4 +34,4 @@ public:
     }
 };
 
-}  // namespace Core
+}  // namespace core

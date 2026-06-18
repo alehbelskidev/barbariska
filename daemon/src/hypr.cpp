@@ -45,7 +45,7 @@ void Hypr::create_workspace(int id)
 {
     char name[128];
     snprintf(name, sizeof(name), "%d", id);
-    Core::HyprWorkspace new_ws = {id, ""};
+    core::HyprWorkspace new_ws = {id, ""};
     strncpy(new_ws.name, name, sizeof(new_ws.name) - 1);
     new_ws.name[sizeof(new_ws.name) - 1] = '\0';
 
@@ -198,17 +198,17 @@ void Hypr::init_hypr_state()
 
         auto wss_json = json::parse(workspaces_jsonstr);
         for (json::iterator it = wss_json.begin(); it != wss_json.end(); ++it) {
-            Core::HyprWorkspace ws;
+            core::HyprWorkspace ws;
             ws.id = (*it)["id"];
             strcpy(ws.name, (*it)["name"].get<std::string>().c_str());
             state.wss[state.ws_count] = ws;
             state.ws_count++;
         }
 
-        state.error_code = Core::NO_ERR;
+        state.error_code = core::NO_ERR;
     } catch (const json::exception &e) {
         std::cerr << "Invalid JSON: " << e.what() << "\n";
-        state.error_code = Core::UNKNOWN_ERR;
+        state.error_code = core::UNKNOWN_ERR;
     }
 }
 
@@ -221,7 +221,7 @@ void Hypr::command(HyprDispatchCommand cmd, int id)
     }
 }
 
-Hypr::Hypr(Core::Hypr &state, std::function<void()> triggerv)
+Hypr::Hypr(core::Hypr &state, std::function<void()> triggerv)
     : state(state), triggerv(triggerv)
 {
     char path[256];

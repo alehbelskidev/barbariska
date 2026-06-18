@@ -4,19 +4,15 @@
 #include <string>
 #include <vector>
 
-#include "colors.hpp"
+#include "core.hpp"
+#include "font.hpp"
 #include "math.hpp"
 #include "toml.hpp"
 
 #define BAR_CONFIG_PATH "/.config/barbariska/bar.toml"
 
-struct Font {
-    std::string family;
-    int size;
-};
-
 struct Theme {
-    Colors::RGBA bg, fg, accent;
+    core::RGBA bg, fg, accent;
 };
 // const char *homedir = getenv("HOME");
 // snprintf(path, size, "%s%s", homedir, configdir);
@@ -38,14 +34,14 @@ struct Widget {
     WidgetType t;
     double gap, roundness;
     bool hoverable;
-    Math::Vec2 padding;
+    core::V2 padding;
     std::optional<std::string> format;
     std::optional<std::array<std::string, 6>> levels;
 };
 
 class Config {
 private:
-    Font font;
+    core::Font font;
     Theme theme;
     std::vector<Widget> left, center, right;
 
@@ -60,7 +56,7 @@ public:
     Config();
     ~Config() = default;
 
-    Font get_font() const
+    core::Font get_font() const
     {
         return font;
     }

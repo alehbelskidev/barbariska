@@ -7,10 +7,7 @@
 #include <iostream>
 
 #include "bar-renderer.hpp"
-#include "client.hpp"
-#include "shm-buffer.hpp"
-#include "surface.hpp"
-#include "wayland-context.hpp"
+#include "core.hpp"
 
 static bool running = true;
 
@@ -28,10 +25,10 @@ int main()
 
     Config config;
     config._DEBUG_print();
-    Core::State state;
+    core::State state;
     strncpy(state.hypr.active_window, "", 108);
-    Core::WaylandContext wctx;
-    Core::Surface surface(wctx.get_compositor(), wctx.get_layer_shell(), 1920,
+    core::WaylandContext wctx;
+    core::Surface surface(wctx.get_compositor(), wctx.get_layer_shell(), 1920,
                           30, [efd]() {
                               uint64_t val = 1;
                               write(efd, &val, sizeof(val));
@@ -40,13 +37,13 @@ int main()
     wctx.roundtrip();
 
     auto surface_dimensions = surface.get_dimensions();
-    Core::ShmBuffer shm_buffer(surface_dimensions, wctx.get_shm());
+    core::ShmBuffer shm_buffer(surface_dimensions, wctx.get_shm());
     BarRenderer r(
         shm_buffer.get_shm_data(),
         [&surface, &shm_buffer]() { surface.commit(shm_buffer.get_buffer()); },
         surface_dimensions, shm_buffer.get_stride(), state, config);
 
-    Core::Client c([&state, efd](Core::State &new_state) {
+    core::Client c([&state, efd](core::State &new_state) {
         state = new_state;
         uint64_t val = 1;
         write(efd, &val, sizeof(val));
@@ -69,13 +66,14 @@ int main()
             read(efd, &val, sizeof(val));
 
             auto theme = config.get_theme();
+            auto font = config.get_font();
             r.draw_rect(
-                Shapes::Rect{.x = 0,
-                             .y = 0,
-                             .width = (double)surface_dimensions.bar_width,
-                             .height = (double)surface_dimensions.bar_height},
+                core::Rect{.x = 0,
+                           .y = 0,
+                           .width = (double)surface_dimensions.bar_width,
+                           .height = (double)surface_dimensions.bar_height},
                 theme.bg);
-            r.draw_text(state.hypr.active_window, theme.fg);
+            r.draw_text(state.hypr.active_window, font, theme.fg);
             r.draw_finish();
 
             wl_display_flush(wctx.get_display());

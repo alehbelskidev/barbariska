@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-void Core::WaylandContext::registry_global_cb(void *data, wl_registry *reg,
+void core::WaylandContext::registry_global_cb(void *data, wl_registry *reg,
                                               uint32_t name,
                                               const char *interface,
                                               uint32_t version)
@@ -26,13 +26,13 @@ void Core::WaylandContext::registry_global_cb(void *data, wl_registry *reg,
     }
 }
 
-void Core::WaylandContext::registry_global_remove_cb(void *data,
+void core::WaylandContext::registry_global_remove_cb(void *data,
                                                      wl_registry *reg,
                                                      uint32_t name)
 {
 }
 
-Core::WaylandContext::WaylandContext()
+core::WaylandContext::WaylandContext()
 {
     // Opening COMPOSITOR connection through WAYLAND_DISPLAY from env,
     // usually wayland-1? doubt it
@@ -57,17 +57,17 @@ Core::WaylandContext::WaylandContext()
     std::cout << "All interfaces bound\n";
 }
 
-Core::WaylandContext::~WaylandContext()
+core::WaylandContext::~WaylandContext()
 {
     wl_display_disconnect(display);
 }
 
-void Core::WaylandContext::roundtrip()
+void core::WaylandContext::roundtrip()
 {
     wl_display_roundtrip(display);
 }
 
-bool Core::WaylandContext::should_dispatch()
+bool core::WaylandContext::should_dispatch()
 {
     return wl_display_dispatch(display) != -1;
 }

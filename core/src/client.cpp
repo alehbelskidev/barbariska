@@ -8,7 +8,7 @@
 
 #include <iostream>
 
-Core::Client::Client(UpdateFn state_update_cb)
+core::Client::Client(UpdateFn state_update_cb)
     : on_state_update(state_update_cb)
 {
     char pathbuf[108];
@@ -36,13 +36,13 @@ Core::Client::Client(UpdateFn state_update_cb)
     // poll_state();
 }
 
-Core::Client::~Client()
+core::Client::~Client()
 {
     if (close(readfd) == -1)
         std::cerr << "ERROR: Failed to close barbariska read .sock\n";
 }
 
-void Core::Client::notify(Command cmd)
+void core::Client::notify(Command cmd)
 {
     char path[108];
     snprintf(path, sizeof(path), BARBARISKA_SOCKET_NOTIF, getuid());
@@ -69,17 +69,17 @@ void Core::Client::notify(Command cmd)
     close(fd);
 }
 
-void Core::Client::poll_state()
+void core::Client::poll_state()
 {
-    char buf[sizeof(Core::State)];
-    int n = read(readfd, buf, sizeof(Core::State));
+    char buf[sizeof(core::State)];
+    int n = read(readfd, buf, sizeof(core::State));
     if (n == -1) {
         std::cerr << "ERROR: Failed to read from barbariska.sock; " << errno
                   << "\n";
         return;
     }
     if (n > 0) {
-        auto *state = reinterpret_cast<Core::State *>(buf);
+        auto *state = reinterpret_cast<core::State *>(buf);
         on_state_update(*state);
     }
 }

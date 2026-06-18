@@ -73,23 +73,23 @@ void BSocket::notif_poll_events()
         return;
     }
 
-    char buf[sizeof(Core::Command)];
+    char buf[sizeof(core::Command)];
 
-    int n = read(clientfd, buf, sizeof(Core::Command));
+    int n = read(clientfd, buf, sizeof(core::Command));
     if (n == -1) {
         std::cerr << "D_ERROR: Failed to read from barbariska.sock; " << errno
                   << "\n";
         return;
     }
     if (n > 0) {
-        const Core::Command *cmd = reinterpret_cast<Core::Command *>(buf);
+        const core::Command *cmd = reinterpret_cast<core::Command *>(buf);
         on_notif_update(*cmd);
     }
 
     close(clientfd);
 }
 
-void BSocket::accept_client(Core::State &state)
+void BSocket::accept_client(core::State &state)
 {
     int clientfd = accept(readfd, nullptr, nullptr);
     if (clientfd == -1) return;
@@ -97,10 +97,10 @@ void BSocket::accept_client(Core::State &state)
     clientfds.push_back(clientfd);
 }
 
-void BSocket::broadcast(Core::State &state)
+void BSocket::broadcast(core::State &state)
 {
     std::erase_if(clientfds, [&](int cfd) {
         auto ret = write(cfd, &state, sizeof(state));
-        return ret != sizeof(Core::State);
+        return ret != sizeof(core::State);
     });
 }

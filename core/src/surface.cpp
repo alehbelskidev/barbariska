@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-Core::Surface::Surface(wl_compositor *compositor,
+core::Surface::Surface(wl_compositor *compositor,
                        zwlr_layer_shell_v1 *layer_shell, int default_w,
                        int default_h, std::function<void()> on_configure_cb)
     : on_configure(on_configure_cb)
@@ -35,7 +35,7 @@ Core::Surface::Surface(wl_compositor *compositor,
     wl_surface_commit(surface);
 }
 
-void Core::Surface::layer_surface_configure_cb(
+void core::Surface::layer_surface_configure_cb(
     void *data, zwlr_layer_surface_v1 *layer_surface, uint32_t serial,
     uint32_t width, uint32_t height)
 {
@@ -46,13 +46,13 @@ void Core::Surface::layer_surface_configure_cb(
     surface->on_configure();
 }
 
-void Core::Surface::layer_surface_closed_cb(
+void core::Surface::layer_surface_closed_cb(
     void *data, zwlr_layer_surface_v1 *layer_surface)
 {
     std::cout << "layer surface closed\n";
 }
 
-void Core::Surface::commit(wl_buffer *buffer)
+void core::Surface::commit(wl_buffer *buffer)
 {
     wl_surface_attach(surface, buffer, 0, 0);
     wl_surface_damage(surface, 0, 0, dimensions.bar_width,

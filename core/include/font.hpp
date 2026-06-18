@@ -1,9 +1,8 @@
 #pragma once
 
 namespace core {
-
-struct Rect {
-    double x, y, width, height;
+struct Font {
+    std::string family;
+    int size;
 };
-
 };  // namespace core

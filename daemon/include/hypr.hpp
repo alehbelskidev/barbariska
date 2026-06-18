@@ -5,7 +5,7 @@
 
 #include <functional>
 
-#include "state.hpp"
+#include "core.hpp"
 
 enum HyprGetCommand {
     GET_ACTIVE_WORKSPACE,
@@ -20,7 +20,7 @@ enum HyprDispatchCommand {
 class Hypr {
 private:
     /// storing ref to partial state
-    Core::Hypr &state;
+    core::Hypr &state;
     /// trigger cb to update version
     std::function<void()> triggerv;
 
@@ -45,7 +45,7 @@ private:
     void init_hypr_state();
 
 public:
-    Hypr(Core::Hypr &state, std::function<void()> triggerv);
+    Hypr(core::Hypr &state, std::function<void()> triggerv);
     ~Hypr();
 
     /// should be placed in backend loop

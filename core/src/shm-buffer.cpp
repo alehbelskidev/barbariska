@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-Core::ShmBuffer::ShmBuffer(Surface::Dimensions surface_dimensions, wl_shm *shm)
+core::ShmBuffer::ShmBuffer(Surface::Dimensions surface_dimensions, wl_shm *shm)
 {
     stride = surface_dimensions.bar_width * 4;
     shm_size = stride * surface_dimensions.bar_height;
@@ -33,7 +33,7 @@ Core::ShmBuffer::ShmBuffer(Surface::Dimensions surface_dimensions, wl_shm *shm)
     close(fd);
 }
 
-Core::ShmBuffer::~ShmBuffer()
+core::ShmBuffer::~ShmBuffer()
 {
     munmap(shm_data, shm_size);
     wl_buffer_destroy(buffer);

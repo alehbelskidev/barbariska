@@ -84,9 +84,9 @@ void Config::parse_font()
 
 void Config::parse_theme()
 {
-    theme.bg = Colors::RGBA(t["theme"]["bg"].value_or("#000000"sv));
-    theme.fg = Colors::RGBA(t["theme"]["fg"].value_or("#ffffff"sv));
-    theme.accent = Colors::RGBA(t["theme"]["accent"].value_or("#000fff"sv));
+    theme.bg = core::RGBA(t["theme"]["bg"].value_or("#000000"sv));
+    theme.fg = core::RGBA(t["theme"]["fg"].value_or("#ffffff"sv));
+    theme.accent = core::RGBA(t["theme"]["accent"].value_or("#000fff"sv));
 }
 
 Widget Config::parse_widget(std::string key)
@@ -115,8 +115,8 @@ Widget Config::parse_widget(std::string key)
     w.gap = section["gap"].value_or(0);
     w.roundness = section["roundness"].value_or(0.0);
     w.hoverable = section["hover"].value_or(false);
-    w.padding = Math::Vec2{.x = section["padding"]["x"].value_or(0.0),
-                           .y = section["padding"]["y"].value_or(0.0)};
+    w.padding = core::V2{.x = section["padding"]["x"].value_or(0.0),
+                         .y = section["padding"]["y"].value_or(0.0)};
 
     return w;
 }
@@ -153,7 +153,7 @@ Config::Config()
 void Config::_DEBUG_print() const
 {
     std::cout << "=== Config ===\n";
-    std::cout << "Шрифт: " << font.family << " " << font.size << "px\n";
+    std::cout << "font: " << font.family << " " << font.size << "px\n";
 
     auto print_widgets = [](const std::string &name,
                             const std::vector<Widget> &widgets) {

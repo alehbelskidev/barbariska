@@ -11,7 +11,7 @@
 
 #define MAX_HYPR_WS_AMOUNT 10
 
-namespace Core {
+namespace core {
 enum ErrorCode { UNKNOWN_ERR, NO_ERR };
 
 struct HyprWorkspace {
@@ -52,4 +52,4 @@ struct Command {
     char arg[256];
 };
 
-}  // namespace Core
+}  // namespace core

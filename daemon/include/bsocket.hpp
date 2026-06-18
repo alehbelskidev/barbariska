@@ -6,9 +6,9 @@
 #include <string>
 #include <vector>
 
-#include "state.hpp"
+#include "core.hpp"
 
-using UpdateFn = std::function<void(const Core::Command &)>;
+using UpdateFn = std::function<void(const core::Command &)>;
 
 /// Daemon socket handling read/notif
 /// ONLY between `barbariska` apps
@@ -30,8 +30,8 @@ public:
     ~BSocket();
 
     void notif_poll_events();
-    void accept_client(Core::State &state);
-    void broadcast(Core::State &state);
+    void accept_client(core::State &state);
+    void broadcast(core::State &state);
 
     int get_readfd() const
     {

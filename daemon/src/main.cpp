@@ -4,8 +4,8 @@
 #include <iostream>
 
 #include "bsocket.hpp"
+#include "core.hpp"
 #include "hypr.hpp"
-#include "state.hpp"
 
 static bool running = true;
 
@@ -20,9 +20,9 @@ int main()
     signal(SIGINT, on_signal);
     signal(SIGPIPE, SIG_IGN);
 
-    Core::State state;
+    core::State state;
 
-    BSocket bsock([](const Core::Command &cmd) {
+    BSocket bsock([](const core::Command &cmd) {
         std::cout << "Reading from sock example " << cmd.type << "\n";
     });
     Hypr hypr(state.hypr, [&state, &bsock]() {

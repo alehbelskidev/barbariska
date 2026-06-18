@@ -3,7 +3,7 @@
 
 #include "wlr-layer-shell-unstable-v1-client-protocol.h"
 
-namespace Core {
+namespace core {
 class Surface {
 public:
     struct Dimensions {
@@ -60,4 +60,4 @@ public:
         return dimensions;
     }
 };
-}  // namespace Core
+}  // namespace core

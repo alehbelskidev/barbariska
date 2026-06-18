@@ -1,10 +1,9 @@
 #pragma once
 
-#include <iostream>
 #include <string>
 #include <string_view>
 
-namespace Colors {
+namespace core {
 struct RGBA {
     double r = 0, g = 0, b = 0, a = 1;
 
@@ -29,4 +28,4 @@ struct RGBA {
     {
     }
 };
-};  // namespace Colors
+};  // namespace core

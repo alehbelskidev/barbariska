@@ -7,7 +7,7 @@
 /// shm_open -> ftruncate -> mmap -> wl_shm_pool -> wl_buffer
 /// COMPOSITOR reads pixels directly from that memory region
 
-namespace Core {
+namespace core {
 class ShmBuffer {
 private:
     /// mmap maps that file inot our address space
@@ -38,4 +38,4 @@ public:
         return stride;
     }
 };
-}  // namespace Core
+}  // namespace core
