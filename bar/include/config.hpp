@@ -39,8 +39,15 @@ struct Widget {
     std::optional<std::array<std::string, 6>> levels;
 };
 
+struct Root {
+    int height;
+    core::V2 padding;
+};
+
 class Config {
 private:
+    Root root;
+
     core::Font font;
     Theme theme;
     std::vector<Widget> left, center, right;
@@ -63,6 +70,10 @@ public:
     Theme get_theme() const
     {
         return theme;
+    }
+    Root get_root() const
+    {
+        return root;
     }
 
     void _DEBUG_print() const;

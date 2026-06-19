@@ -33,7 +33,8 @@ void core::Renderer::draw_rect(core::Rect r, core::RGBA bg)
     cairo_rectangle(cr, r.x, r.y, r.width, r.height);
     cairo_fill(cr);
 }
-void core::Renderer::draw_text(char *text, core::Font font, core::RGBA fg)
+void core::Renderer::draw_text(char *text, core::Font font, core::RGBA fg,
+                               core::V2 padding)
 {
     cairo_set_source_rgba(cr, fg.r, fg.g, fg.b, fg.a);
     cairo_select_font_face(cr, font.family.c_str(), CAIRO_FONT_SLANT_NORMAL,
@@ -43,7 +44,7 @@ void core::Renderer::draw_text(char *text, core::Font font, core::RGBA fg)
     cairo_text_extents_t ext;
     cairo_text_extents(cr, text, &ext);
 
-    cairo_move_to(cr, 0,
+    cairo_move_to(cr, padding.x,
                   (surface_dimensions.bar_height / 2.0 - ext.height / 2.0) -
                       ext.y_bearing);
 

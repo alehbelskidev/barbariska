@@ -91,7 +91,6 @@ void Config::parse_theme()
 
 Widget Config::parse_widget(std::string key)
 {
-    std::cout << "Parsing widget::" << key << "\n";
     auto section = t[key];
     auto wt = get_wtype_by_str(key);
     Widget w;
@@ -139,6 +138,11 @@ Config::Config()
 
     try {
         t = toml::parse_file(configpath);
+
+        root.height = t["root"]["height"].value_or(30);
+        root.padding = core::V2{.x = t["root"]["padding"]["x"].value_or(0.0),
+                                .y = t["root"]["padding"]["y"].value_or(0.0)};
+
         parse_font();
         parse_theme();
 

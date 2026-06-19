@@ -6,6 +6,7 @@
 
 #include "colors.hpp"
 #include "font.hpp"
+#include "math.hpp"
 #include "shapes.hpp"
 #include "state.hpp"
 #include "surface.hpp"
@@ -38,7 +39,8 @@ public:
     virtual ~Renderer();
 
     void draw_rect(core::Rect r, core::RGBA bg);
-    void draw_text(char *text, core::Font font, core::RGBA fg);
+    void draw_text(char *text, core::Font font, core::RGBA fg,
+                   core::V2 padding);
 
     /// Should always been call last!!!
     void draw_finish()

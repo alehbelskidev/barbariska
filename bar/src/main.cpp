@@ -25,11 +25,14 @@ int main()
 
     Config config;
     config._DEBUG_print();
+    auto config_root = config.get_root();
+    auto bar_height = config_root.height + config_root.padding.y * 2;
+
     core::State state;
     strncpy(state.hypr.active_window, "", 108);
     core::WaylandContext wctx;
     core::Surface surface(wctx.get_compositor(), wctx.get_layer_shell(), 1920,
-                          30, [efd]() {
+                          bar_height, [efd]() {
                               uint64_t val = 1;
                               write(efd, &val, sizeof(val));
                           });
@@ -73,7 +76,8 @@ int main()
                            .width = (double)surface_dimensions.bar_width,
                            .height = (double)surface_dimensions.bar_height},
                 theme.bg);
-            r.draw_text(state.hypr.active_window, font, theme.fg);
+            r.draw_text(state.hypr.active_window, font, theme.fg,
+                        config_root.padding);
             r.draw_finish();
 
             wl_display_flush(wctx.get_display());
