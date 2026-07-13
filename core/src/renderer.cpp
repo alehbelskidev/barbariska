@@ -33,8 +33,8 @@ void core::Renderer::draw_rect(core::Rect r, core::RGBA bg)
     cairo_rectangle(cr, r.x, r.y, r.width, r.height);
     cairo_fill(cr);
 }
-void core::Renderer::draw_text(char *text, core::Font font, core::RGBA fg,
-                               core::V2 padding)
+void core::Renderer::draw_text(const char *text, core::Font font, core::RGBA fg,
+                               core::Rect r)
 {
     cairo_set_source_rgba(cr, fg.r, fg.g, fg.b, fg.a);
     cairo_select_font_face(cr, font.family.c_str(), CAIRO_FONT_SLANT_NORMAL,
@@ -44,9 +44,26 @@ void core::Renderer::draw_text(char *text, core::Font font, core::RGBA fg,
     cairo_text_extents_t ext;
     cairo_text_extents(cr, text, &ext);
 
-    cairo_move_to(cr, padding.x,
-                  (surface_dimensions.bar_height / 2.0 - ext.height / 2.0) -
-                      ext.y_bearing);
+    cairo_move_to(cr, r.x, (r.height / 2.0 - ext.height / 2.0) - ext.y_bearing);
 
     cairo_show_text(cr, text);
+}
+
+core::Size core::Renderer::measure_text(const char *text, core::Font font)
+{
+    cairo_surface_t *temp_surface =
+        cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1);
+    cairo_t *temp_cr = cairo_create(temp_surface);
+
+    cairo_select_font_face(temp_cr, font.family.c_str(),
+                           CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size(temp_cr, font.size);
+
+    cairo_text_extents_t ext;
+    cairo_text_extents(temp_cr, text, &ext);
+
+    cairo_destroy(temp_cr);
+    cairo_surface_destroy(temp_surface);
+
+    return core::Size{.width = (float)ext.width, .height = (float)ext.height};
 }

@@ -1,8 +1,9 @@
 #pragma once
 
+#include <string>
+
 #include "config.hpp"
-#include "renderer.hpp"
-#include "surface.hpp"
+#include "core.hpp"
 
 class BarRenderer : public core::Renderer {
 private:
@@ -17,4 +18,8 @@ public:
     {
     }
     ~BarRenderer() = default;
+
+    void theme_draw_rect(core::Rect rect);
+    void theme_draw_text(std::string text, core::Rect r);
+    core::Size theme_measure_text(std::string text);
 };

@@ -189,7 +189,7 @@ void Hypr::init_hypr_state()
 
     try {
         auto awin_json = json::parse(active_window_jsonstr);
-        snprintf(state.active_window, 108, "%s - %s",
+        snprintf(state.active_window, 108, "%s\x1F%s",
                  awin_json["class"].get<std::string>().c_str(),
                  awin_json["title"].get<std::string>().c_str());
 

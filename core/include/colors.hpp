@@ -28,4 +28,5 @@ struct RGBA {
     {
     }
 };
+
 };  // namespace core

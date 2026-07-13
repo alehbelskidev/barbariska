@@ -5,7 +5,10 @@
 
 #include <csignal>
 #include <iostream>
+#include <memory>
+#include <utility>
 
+#include "bar-layout.hpp"
 #include "bar-renderer.hpp"
 #include "core.hpp"
 
@@ -60,6 +63,31 @@ int main()
     fds[2].fd = c.get_readfd();
     fds[2].events = POLLIN;
 
+    auto theme = config.get_theme();
+
+    auto left = container(core::NodeData{}, {});
+    auto center = container(core::NodeData{}, {});
+    auto right = container(core::NodeData{}, {});
+
+    parse_config_group(config.get_left(), left);
+    parse_config_group(config.get_center(), center);
+    parse_config_group(config.get_right(), right);
+
+    std::vector<std::unique_ptr<core::Node>> groups;
+    groups.push_back(std::move(left));
+    groups.push_back(std::move(center));
+    groups.push_back(std::move(right));
+
+    auto tree = container(
+        core::NodeData{
+            .width = (float)surface_dimensions.bar_width,
+            .height = (float)surface_dimensions.bar_height,
+            .x = 0,
+            .y = 0,
+            .padding = config_root.padding,
+        },
+        std::move(groups));
+
     while (running) {
         wl_display_flush(wctx.get_display());
         poll(fds, 3, -1);
@@ -68,16 +96,12 @@ int main()
             uint64_t val;
             read(efd, &val, sizeof(val));
 
-            auto theme = config.get_theme();
-            auto font = config.get_font();
-            r.draw_rect(
-                core::Rect{.x = 0,
-                           .y = 0,
-                           .width = (double)surface_dimensions.bar_width,
-                           .height = (double)surface_dimensions.bar_height},
-                theme.bg);
-            r.draw_text(state.hypr.active_window, font, theme.fg,
-                        config_root.padding);
+            /// TODO:
+            /// look for specific updates and update specific widgets from
+            /// widget tree by using find on found node call .update(NodeData{})
+            /// run .render(&r); on root node
+            tree->render(&r);
+
             r.draw_finish();
 
             wl_display_flush(wctx.get_display());

@@ -63,17 +63,29 @@ public:
     Config();
     ~Config() = default;
 
-    core::Font get_font() const
+    const core::Font &get_font() const
     {
         return font;
     }
-    Theme get_theme() const
+    const Theme &get_theme() const
     {
         return theme;
     }
-    Root get_root() const
+    const Root &get_root() const
     {
         return root;
+    }
+    const std::vector<Widget> &get_left() const
+    {
+        return left;
+    }
+    const std::vector<Widget> &get_center() const
+    {
+        return center;
+    }
+    const std::vector<Widget> &get_right() const
+    {
+        return right;
     }
 
     void _DEBUG_print() const;
