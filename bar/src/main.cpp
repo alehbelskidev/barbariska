@@ -65,9 +65,9 @@ int main()
 
     auto theme = config.get_theme();
 
-    auto left = container(core::NodeData{}, {});
-    auto center = container(core::NodeData{}, {});
-    auto right = container(core::NodeData{}, {});
+    auto left = container(core::NodeData{}, {}, Anchor::LEFT);
+    auto center = container(core::NodeData{}, {}, Anchor::CENTER);
+    auto right = container(core::NodeData{}, {}, Anchor::RIGHT);
 
     parse_config_group(config.get_left(), left);
     parse_config_group(config.get_center(), center);
@@ -86,7 +86,7 @@ int main()
             .y = 0,
             .padding = config_root.padding,
         },
-        std::move(groups));
+        std::move(groups), Anchor::FULL);
 
     while (running) {
         wl_display_flush(wctx.get_display());
@@ -96,10 +96,6 @@ int main()
             uint64_t val;
             read(efd, &val, sizeof(val));
 
-            /// TODO:
-            /// look for specific updates and update specific widgets from
-            /// widget tree by using find on found node call .update(NodeData{})
-            /// run .render(&r); on root node
             tree->render(&r);
 
             r.draw_finish();

@@ -6,9 +6,14 @@
 #include "core.hpp"
 
 /// Definitions
+
+enum class Anchor { LEFT, CENTER, RIGHT, FULL, AUTO };
+
 class Container : public core::Node {
 public:
-    Container(const core::NodeData &node_data);
+    std::string t_str = "Container";
+    Anchor anchor;
+    Container(const core::NodeData &node_data, Anchor anchor);
 
     void measure(void *renderer_ptr, const core::Node &parent) override;
     void render(void *renderer_ptr, const core::Node &parent) override;
@@ -17,6 +22,8 @@ public:
 
 class WindowWidget : public core::Node {
 public:
+    WidgetType t = WidgetType::WINDOW;
+    std::string t_str = "Window";
     WindowWidget(const core::NodeData &node_data, std::string format);
 
     WidgetType type = WidgetType::WINDOW;
@@ -32,6 +39,8 @@ public:
 
 class UnknownWidget : public core::Node {
 public:
+    WidgetType t = WidgetType::UNKNOWN;
+    std::string t_str = "Unknown";
     UnknownWidget(const core::NodeData &node_data);
 
     WidgetType type = WidgetType::UNKNOWN;
@@ -46,9 +55,10 @@ public:
 /// Helpers
 inline std::unique_ptr<core::Node> container(
     core::NodeData node_data,
-    std::vector<std::unique_ptr<core::Node>> children = {})
+    std::vector<std::unique_ptr<core::Node>> children = {},
+    Anchor anchor = Anchor::AUTO)
 {
-    auto node = std::make_unique<Container>(node_data);
+    auto node = std::make_unique<Container>(node_data, anchor);
     for (auto &child : children) {
         node->add_child(std::move(child));
     }
@@ -96,5 +106,10 @@ inline void parse_config_group(const std::vector<Widget> &config_group,
         }
     }
 }
+
+// inline std::unique_ptr<core::Node> find_widget_by_type_in(
+//     std::unique_ptr<core::Node> root, WidgetType t)
+//{
+// }
 
 /// Builder

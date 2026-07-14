@@ -11,9 +11,12 @@
 #include "math.hpp"
 
 namespace core {
+
+/// TODO: remove, appeared just to not to use cairo text ext
 struct Size {
     float width, height;
 };
+
 struct NodeData {
     float width = 0, height = 0, x = 0, y = 0;
     core::V2 padding{};

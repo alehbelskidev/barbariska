@@ -44,7 +44,7 @@ void core::Renderer::draw_text(const char *text, core::Font font, core::RGBA fg,
     cairo_text_extents_t ext;
     cairo_text_extents(cr, text, &ext);
 
-    cairo_move_to(cr, r.x, (r.height / 2.0 - ext.height / 2.0) - ext.y_bearing);
+    cairo_move_to(cr, r.x, r.y - ext.y_bearing);
 
     cairo_show_text(cr, text);
 }

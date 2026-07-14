@@ -1,13 +1,28 @@
 #include "bar-layout.hpp"
 
+#include <iostream>
 #include <regex>
 
 #include "bar-renderer.hpp"
 
+void debug_node(const core::Node &n, std::string t_str)
+{
+    auto d = n.get_data();
+    std::cout << "DEBUG::[" << t_str << "]" << std::endl;
+    std::cout << "width=" << d.width << ". height=" << d.height << "."
+              << std::endl;
+    std::cout << "x=" << d.x << ". y=" << d.y << "." << std::endl;
+    std::cout << "padding.x=" << d.padding.x << ". padding.y=" << d.padding.y
+              << "." << std::endl;
+    std::cout << "--------------------------------------------" << std::endl;
+}
+
 /// Container
-Container::Container(const core::NodeData &node_data) : core::Node(node_data)
+Container::Container(const core::NodeData &node_data, Anchor anchor)
+    : core::Node(node_data), anchor(anchor)
 {
 }
+
 void Container::measure(void *renderer_ptr, const core::Node &parent)
 {
     data.width = 0;
@@ -16,58 +31,80 @@ void Container::measure(void *renderer_ptr, const core::Node &parent)
         auto &child = *it;
         child->measure(renderer_ptr, *this);
         auto &child_data = child->get_data();
-        data.width += child_data.width + child_data.padding.x;
+        data.width += child_data.x + child_data.width;
         if (child_data.height > data.height) data.height = child_data.height;
     }
 }
+
 void Container::render(void *renderer_ptr, const core::Node &parent)
 {
     if (children.empty()) return;
     auto &r = *static_cast<BarRenderer *>(renderer_ptr);
+    auto parent_data = parent.get_data();
+
+    for (auto &child : children) {
+        child->measure(renderer_ptr, *this);
+    }
 
     data.width = 0;
     data.height = 0;
-    for (auto it = children.rbegin(); it != children.rend(); ++it) {
-        auto &child = *it;
-        child->measure(renderer_ptr, *this);
+    for (auto &child : children) {
         auto &child_data = child->get_data();
-        data.width += child_data.width + child_data.padding.x;
+        data.width += child_data.x + child_data.width;
         if (child_data.height > data.height) data.height = child_data.height;
     }
 
+    float offset_x = 0;
+    switch (anchor) {
+        case Anchor::LEFT:
+            offset_x = parent_data.x + parent_data.padding.x;
+            break;
+        case Anchor::CENTER:
+            offset_x = parent_data.x + (parent_data.width - data.width) / 2;
+            break;
+        case Anchor::RIGHT:
+            offset_x = parent_data.x + parent_data.width -
+                       parent_data.padding.x - data.width;
+            break;
+        case Anchor::AUTO:
+            offset_x = parent_data.x + data.x;
+            break;
+        default:
+            offset_x = parent_data.x + data.x;
+            break;
+    }
+    data.x = offset_x;
+
     r.theme_draw_rect(core::Rect{
         .x = data.x,
-        .y = data.y,
+        .y = parent_data.padding.y,
         .width = data.width,
         .height = data.height,
     });
 
-    for (auto it = children.rbegin(); it != children.rend(); ++it) {
-        auto &child = *it;
+    for (auto &child : children) {
         child->render(renderer_ptr, *this);
     }
+    debug_node(*this, t_str);
 }
+
 void Container::render(void *renderer_ptr)
 {
     if (children.empty()) return;
     auto &r = *static_cast<BarRenderer *>(renderer_ptr);
 
-    for (auto it = children.rbegin(); it != children.rend(); ++it) {
-        auto &child = *it;
-        child->measure(renderer_ptr, *this);
-    }
-
     r.theme_draw_rect(core::Rect{
-        .x = data.x,
-        .y = data.y,
+        .x = 0,
+        .y = 0,
         .width = data.width,
         .height = data.height,
     });
 
-    for (auto it = children.rbegin(); it != children.rend(); ++it) {
-        auto &child = *it;
+    for (auto &child : children) {
         child->render(renderer_ptr, *this);
     }
+
+    debug_node(*this, t_str);
 }
 /// END Container
 
@@ -100,11 +137,9 @@ void WindowWidget::measure(void *renderer_ptr, const core::Node &parent)
         data.height = 0;
         return;
     }
-
     if (last_measured_text == data.text.value()) {
         return;
     }
-
     auto &r = *static_cast<BarRenderer *>(renderer_ptr);
     auto parent_data = parent.get_data();
     text_ext = r.theme_measure_text(data.text.value());
@@ -113,17 +148,22 @@ void WindowWidget::measure(void *renderer_ptr, const core::Node &parent)
     data.height = text_ext.height + parent_data.padding.y * 2;
     last_measured_text = data.text.value();
 }
+
 void WindowWidget::render(void *renderer_ptr, const core::Node &parent)
 {
     auto &r = *static_cast<BarRenderer *>(renderer_ptr);
     auto parent_data = parent.get_data();
-    auto container =
-        core::Rect{.x = parent_data.x + data.x,
-                   .y = parent_data.y + data.y,
-                   .width = text_ext.width + parent_data.padding.x,
-                   .height = text_ext.height + parent_data.padding.y};
+
+    float abs_x = parent_data.x + data.x;
+    float abs_y = parent_data.y;
+
+    core::Rect container{.x = abs_x,
+                         .y = abs_y,
+                         .width = text_ext.width + parent_data.padding.x * 2,
+                         .height = text_ext.height + parent_data.padding.y * 2};
 
     r.theme_draw_rect(container);
+
     std::string text_val =
         data.text.has_value() ? data.text.value() : "WINDOW WIDGET (notext)";
     r.theme_draw_text(text_val,
@@ -131,7 +171,8 @@ void WindowWidget::render(void *renderer_ptr, const core::Node &parent)
                                  .y = container.y + parent_data.padding.y,
                                  .width = text_ext.width,
                                  .height = text_ext.height});
-};
+    debug_node(*this, t_str);
+}
 /// END Window
 
 /// Unknown
@@ -148,11 +189,9 @@ void UnknownWidget::measure(void *renderer_ptr, const core::Node &parent)
         data.height = 0;
         return;
     }
-
     if (last_measured_text == data.text.value()) {
         return;
     }
-
     auto &r = *static_cast<BarRenderer *>(renderer_ptr);
     auto parent_data = parent.get_data();
     text_ext = r.theme_measure_text(data.text.value());
@@ -165,20 +204,24 @@ void UnknownWidget::render(void *renderer_ptr, const core::Node &parent)
 {
     auto &r = *static_cast<BarRenderer *>(renderer_ptr);
     auto parent_data = parent.get_data();
-    auto container =
-        core::Rect{.x = parent_data.x + data.x,
-                   .y = parent_data.y + data.y,
-                   .width = text_ext.width + parent_data.padding.x,
-                   .height = text_ext.height + parent_data.padding.y};
 
-    std::string text_val =
-        data.text.has_value() ? data.text.value() : "UNKOWN WIDGET (notext)";
-    text_ext = r.theme_measure_text(text_val);
+    float abs_x = parent_data.x + data.x;
+    float abs_y = parent_data.y + data.y;
+
+    core::Rect container{.x = abs_x,
+                         .y = abs_y,
+                         .width = text_ext.width + parent_data.padding.x * 2,
+                         .height = text_ext.height + parent_data.padding.y * 2};
+
     r.theme_draw_rect(container);
-    r.theme_draw_text(text_val,
-                      core::Rect{.x = container.x + parent_data.padding.x,
-                                 .y = container.y + parent_data.padding.y,
-                                 .width = text_ext.width,
-                                 .height = text_ext.height});
+
+    core::Rect text_rect{.x = container.x + parent_data.padding.x,
+                         .y = container.y + parent_data.padding.y +
+                              (container.height / 2 - text_ext.height / 2),
+                         .width = text_ext.width,
+                         .height = text_ext.height};
+
+    r.theme_draw_text(data.text.value(), text_rect);
+    debug_node(*this, t_str);
 }
 /// End Unknown
