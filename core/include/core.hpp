@@ -3,7 +3,6 @@
 #include "client.hpp"
 #include "colors.hpp"
 #include "font.hpp"
-#include "layout.hpp"
 #include "math.hpp"
 #include "renderer.hpp"
 #include "shapes.hpp"

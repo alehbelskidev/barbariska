@@ -114,8 +114,6 @@ Widget Config::parse_widget(std::string key)
     w.gap = section["gap"].value_or(0);
     w.roundness = section["roundness"].value_or(0.0);
     w.hoverable = section["hover"].value_or(false);
-    w.padding = core::V2{.x = section["padding"]["x"].value_or(0.0),
-                         .y = section["padding"]["y"].value_or(0.0)};
 
     return w;
 }
@@ -139,9 +137,8 @@ Config::Config()
     try {
         t = toml::parse_file(configpath);
 
-        root.height = t["root"]["height"].value_or(30);
-        root.padding = core::V2{.x = t["root"]["padding"]["x"].value_or(0.0),
-                                .y = t["root"]["padding"]["y"].value_or(0.0)};
+        root.height = t["root"]["height"].value_or(30.0);
+        root.gap = t["root"]["gap"].value_or(12.0);
 
         parse_font();
         parse_theme();
@@ -163,10 +160,6 @@ void Config::_DEBUG_print() const
                             const std::vector<Widget> &widgets) {
         std::cout << "\n[" << name << "]\n";
         for (const auto &w : widgets) {
-            std::cout << "  type=" << static_cast<int>(w.t) << " gap=" << w.gap
-                      << " roundness=" << w.roundness
-                      << " hoverable=" << w.hoverable << " padding=("
-                      << w.padding.x << "," << w.padding.y << ")\n";
             if (w.format) std::cout << "    format=" << *w.format << "\n";
             if (w.levels) {
                 std::cout << "    levels=[ ";

@@ -5,223 +5,164 @@
 
 #include "bar-renderer.hpp"
 
-void debug_node(const core::Node &n, std::string t_str)
+void create_blocks_of_widgets(const std::vector<Widget> &in,
+                              std::vector<block> &out)
 {
-    auto d = n.get_data();
-    std::cout << "DEBUG::[" << t_str << "]" << std::endl;
-    std::cout << "width=" << d.width << ". height=" << d.height << "."
-              << std::endl;
-    std::cout << "x=" << d.x << ". y=" << d.y << "." << std::endl;
-    std::cout << "padding.x=" << d.padding.x << ". padding.y=" << d.padding.y
-              << "." << std::endl;
-    std::cout << "--------------------------------------------" << std::endl;
-}
-
-/// Container
-Container::Container(const core::NodeData &node_data, Anchor anchor)
-    : core::Node(node_data), anchor(anchor)
-{
-}
-
-void Container::measure(void *renderer_ptr, const core::Node &parent)
-{
-    data.width = 0;
-    data.height = 0;
-    for (auto it = children.rbegin(); it != children.rend(); ++it) {
-        auto &child = *it;
-        child->measure(renderer_ptr, *this);
-        auto &child_data = child->get_data();
-        data.width += child_data.x + child_data.width;
-        if (child_data.height > data.height) data.height = child_data.height;
+    for (const auto &it : in) {
+        out.push_back(block{.gap = it.gap,
+                            .hoverable = it.hoverable,
+                            .t = it.t,
+                            .format = it.format});
     }
 }
 
-void Container::render(void *renderer_ptr, const core::Node &parent)
+UI::UI(BarRenderer &r, std::vector<Widget> &left, std::vector<Widget> &center,
+       std::vector<Widget> &right, Widget &root, float root_width)
+    : r(r), root(root), root_width(root_width)
 {
-    if (children.empty()) return;
-    auto &r = *static_cast<BarRenderer *>(renderer_ptr);
-    auto parent_data = parent.get_data();
-
-    for (auto &child : children) {
-        child->measure(renderer_ptr, *this);
-    }
-
-    data.width = 0;
-    data.height = 0;
-    for (auto &child : children) {
-        auto &child_data = child->get_data();
-        data.width += child_data.x + child_data.width;
-        if (child_data.height > data.height) data.height = child_data.height;
-    }
-
-    float offset_x = 0;
-    switch (anchor) {
-        case Anchor::LEFT:
-            offset_x = parent_data.x + parent_data.padding.x;
-            break;
-        case Anchor::CENTER:
-            offset_x = parent_data.x + (parent_data.width - data.width) / 2;
-            break;
-        case Anchor::RIGHT:
-            offset_x = parent_data.x + parent_data.width -
-                       parent_data.padding.x - data.width;
-            break;
-        case Anchor::AUTO:
-            offset_x = parent_data.x + data.x;
-            break;
-        default:
-            offset_x = parent_data.x + data.x;
-            break;
-    }
-    data.x = offset_x;
-
-    r.theme_draw_rect(core::Rect{
-        .x = data.x,
-        .y = parent_data.padding.y,
-        .width = data.width,
-        .height = data.height,
-    });
-
-    for (auto &child : children) {
-        child->render(renderer_ptr, *this);
-    }
-    debug_node(*this, t_str);
+    create_blocks_of_widgets(left, lblocks);
+    create_blocks_of_widgets(center, cblocks);
+    create_blocks_of_widgets(right, rblocks);
 }
 
-void Container::render(void *renderer_ptr)
+void UI::draw(core::State &s)
 {
-    if (children.empty()) return;
-    auto &r = *static_cast<BarRenderer *>(renderer_ptr);
-
     r.theme_draw_rect(core::Rect{
         .x = 0,
         .y = 0,
-        .width = data.width,
-        .height = data.height,
+        .width = root_width,
+        .height = root.height,
     });
 
-    for (auto &child : children) {
-        child->render(renderer_ptr, *this);
+    prepare_container(anchor::LEFT, lstart, lblocks, s);
+    prepare_container(anchor::CENTER, cstart, cblocks, s);
+    prepare_container(anchor::RIGHT, rstart, rblocks, s);
+
+    draw_container(lstart, lblocks);
+    draw_container(cstart, cblocks);
+    draw_container(rstart, rblocks);
+}
+
+void UI::prepare_container(anchor a, float &start, std::vector<block> &blocks,
+                           const core::State &s)
+{
+    float total_width = 0;
+
+    for (auto &it : blocks) {
+        switch (it.t) {
+            case WidgetType::WINDOW: {
+                prepare_text_block(it, s.hypr.active_window);
+                total_width += it.width;
+                break;
+            }
+            case WidgetType::UNKNOWN: {
+                prepare_text_block(it, "UNKNOWN_WIDGET");
+                break;
+            }
+            case WidgetType::ROOT:
+            case WidgetType::WORKSPACES:
+            case WidgetType::CLOCK:
+            case WidgetType::WIFI:
+            case WidgetType::VOLUME:
+            case WidgetType::DISKS:
+            case WidgetType::PROC:
+            case WidgetType::RAM:
+            case WidgetType::SYSTEM:
+                break;
+        }
     }
 
-    debug_node(*this, t_str);
-}
-/// END Container
-
-/// Window
-WindowWidget::WindowWidget(const core::NodeData &node_data, std::string format)
-    : core::Node(node_data), format(format)
-{
-    /// FYI: should probably set text here, but won't
-}
-
-void WindowWidget::set_text(void *renderer_ptr, std::string input)
-{
-    auto &r = *static_cast<BarRenderer *>(renderer_ptr);
-    auto pos = input.find('\x1F');
-    auto class_name = input.substr(0, pos);
-    auto title = input.substr(pos + 1);
-
-    std::string result(format);
-    result = std::regex_replace(result, std::regex("\\%class"), class_name);
-    result = std::regex_replace(result, std::regex("\\%title"), title);
-
-    data.text = result;
-    text_ext = r.theme_measure_text(result);
-}
-
-void WindowWidget::measure(void *renderer_ptr, const core::Node &parent)
-{
-    if (!data.text.has_value()) {
-        data.width = 0;
-        data.height = 0;
-        return;
+    switch (a) {
+        case anchor::LEFT:
+            start = root.gap;
+            break;
+        case anchor::CENTER:
+            start = (root_width - root.gap) / 2 - total_width / 2;
+            break;
+        case anchor::RIGHT:
+            start = root_width - root.gap - total_width;
+            break;
     }
-    if (last_measured_text == data.text.value()) {
-        return;
+}
+
+void UI::draw_container(const float &start, std::vector<block> &blocks)
+{
+    float caret = start;
+
+    for (auto &it : blocks) {
+        switch (it.t) {
+            case WidgetType::WINDOW:
+            case WidgetType::UNKNOWN:
+                draw_text_block(caret, it);
+                caret += it.width;
+                break;
+            case WidgetType::ROOT:
+            case WidgetType::WORKSPACES:
+            case WidgetType::CLOCK:
+            case WidgetType::WIFI:
+            case WidgetType::VOLUME:
+            case WidgetType::DISKS:
+            case WidgetType::PROC:
+            case WidgetType::RAM:
+            case WidgetType::SYSTEM:
+                break;
+        }
     }
-    auto &r = *static_cast<BarRenderer *>(renderer_ptr);
-    auto parent_data = parent.get_data();
-    text_ext = r.theme_measure_text(data.text.value());
-
-    data.width = text_ext.width + parent_data.padding.x * 2;
-    data.height = text_ext.height + parent_data.padding.y * 2;
-    last_measured_text = data.text.value();
 }
 
-void WindowWidget::render(void *renderer_ptr, const core::Node &parent)
+/// TODO:: Trim text to 54-54 max based on format, 108 max in general
+/// FIXME:: Check daemon cuz, this should be trimmed on daemon side :(
+std::string format_window_text(std::optional<std::string> &format,
+                               std::string &text)
 {
-    auto &r = *static_cast<BarRenderer *>(renderer_ptr);
-    auto parent_data = parent.get_data();
+    std::string result;
 
-    float abs_x = parent_data.x + data.x;
-    float abs_y = parent_data.y;
+    if (format.has_value()) {
+        std::string input(text);
+        auto pos = input.find('\x1F');
+        auto class_name = input.substr(0, pos);
+        auto title = input.substr(pos + 1);
 
-    core::Rect container{.x = abs_x,
-                         .y = abs_y,
-                         .width = text_ext.width + parent_data.padding.x * 2,
-                         .height = text_ext.height + parent_data.padding.y * 2};
-
-    r.theme_draw_rect(container);
-
-    std::string text_val =
-        data.text.has_value() ? data.text.value() : "WINDOW WIDGET (notext)";
-    r.theme_draw_text(text_val,
-                      core::Rect{.x = container.x + parent_data.padding.x,
-                                 .y = container.y + parent_data.padding.y,
-                                 .width = text_ext.width,
-                                 .height = text_ext.height});
-    debug_node(*this, t_str);
-}
-/// END Window
-
-/// Unknown
-UnknownWidget::UnknownWidget(const core::NodeData &node_data)
-    : core::Node(node_data)
-{
-    data.text = "UNKNOWN";
-}
-
-void UnknownWidget::measure(void *renderer_ptr, const core::Node &parent)
-{
-    if (!data.text.has_value()) {
-        data.width = 0;
-        data.height = 0;
-        return;
+        result = format.value();
+        result = std::regex_replace(result, std::regex("\\%class"), class_name);
+        result = std::regex_replace(result, std::regex("\\%title"), title);
+    } else {
+        result = std::string(text);
     }
-    if (last_measured_text == data.text.value()) {
-        return;
-    }
-    auto &r = *static_cast<BarRenderer *>(renderer_ptr);
-    auto parent_data = parent.get_data();
-    text_ext = r.theme_measure_text(data.text.value());
 
-    data.width = text_ext.width + parent_data.padding.x * 2;
-    data.height = text_ext.height + parent_data.padding.y * 2;
-    last_measured_text = data.text.value();
+    return result;
 }
-void UnknownWidget::render(void *renderer_ptr, const core::Node &parent)
+
+void UI::prepare_text_block(block &b, std::string text)
 {
-    auto &r = *static_cast<BarRenderer *>(renderer_ptr);
-    auto parent_data = parent.get_data();
+    auto formatted_text = format_window_text(b.format, text);
+    auto text_ext = r.theme_measure_text(formatted_text);
 
-    float abs_x = parent_data.x + data.x;
-    float abs_y = parent_data.y + data.y;
-
-    core::Rect container{.x = abs_x,
-                         .y = abs_y,
-                         .width = text_ext.width + parent_data.padding.x * 2,
-                         .height = text_ext.height + parent_data.padding.y * 2};
-
-    r.theme_draw_rect(container);
-
-    core::Rect text_rect{.x = container.x + parent_data.padding.x,
-                         .y = container.y + parent_data.padding.y +
-                              (container.height / 2 - text_ext.height / 2),
-                         .width = text_ext.width,
-                         .height = text_ext.height};
-
-    r.theme_draw_text(data.text.value(), text_rect);
-    debug_node(*this, t_str);
+    b.width = text_ext.width + b.gap * 2;
+    b.height = root.height;
+    b.text_width = text_ext.width;
+    b.text_height = text_ext.height;
+    b.text = formatted_text;
 }
-/// End Unknown
+
+void UI::draw_text_block(float &caret, block &b)
+{
+    b.x = caret;
+    b.y = 0;
+    b.text_x = b.x + b.gap;
+    b.text_y = b.height / 2 - b.text_height / 2;
+
+    // r.theme_draw_rect(core::Rect{
+    //     .x = b.x,
+    //     .y = b.y,
+    //     .width = b.width,
+    //     .height = b.height,
+    // });
+
+    r.theme_draw_text(b.text, core::Rect{
+                                  .x = b.text_x,
+                                  .y = b.text_y,
+                                  .width = b.text_width,
+                                  .height = b.text_height,
+                              });
+}

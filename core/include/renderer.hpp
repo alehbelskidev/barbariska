@@ -6,14 +6,16 @@
 
 #include "colors.hpp"
 #include "font.hpp"
-#include "layout.hpp"
 #include "math.hpp"
 #include "shapes.hpp"
-#include "state.hpp"
 #include "surface.hpp"
 
 namespace core {
 using CommitFn = std::function<void()>;
+/// TODO: REmove this shit
+struct Size {
+    float width, height;
+};
 
 class Renderer {
 private:
@@ -29,14 +31,11 @@ protected:
     /// cr - is a pen.
     /// shm always synced
     cairo_t *cr;
-    /// Holding ref on state
-    State &state;
     void flush();
 
 public:
     Renderer(void *shm_data, CommitFn commit_cb,
-             core::Surface::Dimensions surface_dimensions, int stride,
-             State &state);
+             core::Surface::Dimensions surface_dimensions, int stride);
     virtual ~Renderer();
 
     void draw_rect(core::Rect r, core::RGBA bg);

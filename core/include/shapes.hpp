@@ -3,7 +3,7 @@
 namespace core {
 
 struct Rect {
-    double x, y, width, height;
+    float x, y, width, height;
 };
 
 };  // namespace core

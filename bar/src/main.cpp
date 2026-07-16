@@ -29,7 +29,7 @@ int main()
     Config config;
     config._DEBUG_print();
     auto config_root = config.get_root();
-    auto bar_height = config_root.height + config_root.padding.y * 2;
+    auto bar_height = config_root.height;
 
     core::State state;
     strncpy(state.hypr.active_window, "", 108);
@@ -47,7 +47,7 @@ int main()
     BarRenderer r(
         shm_buffer.get_shm_data(),
         [&surface, &shm_buffer]() { surface.commit(shm_buffer.get_buffer()); },
-        surface_dimensions, shm_buffer.get_stride(), state, config);
+        surface_dimensions, shm_buffer.get_stride(), config);
 
     core::Client c([&state, efd](core::State &new_state) {
         state = new_state;
@@ -65,28 +65,12 @@ int main()
 
     auto theme = config.get_theme();
 
-    auto left = container(core::NodeData{}, {}, Anchor::LEFT);
-    auto center = container(core::NodeData{}, {}, Anchor::CENTER);
-    auto right = container(core::NodeData{}, {}, Anchor::RIGHT);
+    auto config_left = config.get_left();
+    auto config_center = config.get_center();
+    auto config_right = config.get_right();
 
-    parse_config_group(config.get_left(), left);
-    parse_config_group(config.get_center(), center);
-    parse_config_group(config.get_right(), right);
-
-    std::vector<std::unique_ptr<core::Node>> groups;
-    groups.push_back(std::move(left));
-    groups.push_back(std::move(center));
-    groups.push_back(std::move(right));
-
-    auto tree = container(
-        core::NodeData{
-            .width = (float)surface_dimensions.bar_width,
-            .height = (float)surface_dimensions.bar_height,
-            .x = 0,
-            .y = 0,
-            .padding = config_root.padding,
-        },
-        std::move(groups), Anchor::FULL);
+    auto ui = UI(r, config_left, config_center, config_right, config_root,
+                 (float)surface_dimensions.bar_width);
 
     while (running) {
         wl_display_flush(wctx.get_display());
@@ -96,8 +80,7 @@ int main()
             uint64_t val;
             read(efd, &val, sizeof(val));
 
-            tree->render(&r);
-
+            ui.draw(state);
             r.draw_finish();
 
             wl_display_flush(wctx.get_display());

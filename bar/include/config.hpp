@@ -18,6 +18,7 @@ struct Theme {
 // snprintf(path, size, "%s%s", homedir, configdir);
 
 enum class WidgetType {
+    ROOT,
     WORKSPACES,
     WINDOW,
     CLOCK,
@@ -32,21 +33,15 @@ enum class WidgetType {
 
 struct Widget {
     WidgetType t;
-    double gap, roundness;
+    float gap, roundness, height;
     bool hoverable;
-    core::V2 padding;
     std::optional<std::string> format;
     std::optional<std::array<std::string, 6>> levels;
 };
 
-struct Root {
-    int height;
-    core::V2 padding;
-};
-
 class Config {
 private:
-    Root root;
+    Widget root;
 
     core::Font font;
     Theme theme;
@@ -71,7 +66,7 @@ public:
     {
         return theme;
     }
-    const Root &get_root() const
+    const Widget &get_root() const
     {
         return root;
     }

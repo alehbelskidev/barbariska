@@ -3,9 +3,8 @@
 #include "core.hpp"
 
 core::Renderer::Renderer(void *shm_data, CommitFn commit_cb,
-                         Surface::Dimensions surface_dimensions, int stride,
-                         State &state)
-    : on_commit(commit_cb), surface_dimensions(surface_dimensions), state(state)
+                         Surface::Dimensions surface_dimensions, int stride)
+    : on_commit(commit_cb), surface_dimensions(surface_dimensions)
 {
     cairo_surface = cairo_image_surface_create_for_data(
         static_cast<unsigned char *>(shm_data), CAIRO_FORMAT_ARGB32,

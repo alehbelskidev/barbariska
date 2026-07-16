@@ -12,8 +12,8 @@ private:
 public:
     BarRenderer(void *shm_data, core::CommitFn commit_cb,
                 core::Surface::Dimensions surface_dimensions, int stride,
-                core::State &state, Config &config)
-        : Renderer(shm_data, commit_cb, surface_dimensions, stride, state),
+                Config &config)
+        : Renderer(shm_data, commit_cb, surface_dimensions, stride),
           config(config)
     {
     }
