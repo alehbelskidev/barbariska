@@ -30,11 +30,24 @@ void Hypr::init_socket()
 
 void Hypr::update_active_window(char w[108])
 {
-    if (strcmp(state.active_window, w) != 0) {
-        memcpy(state.active_window, w, sizeof(state.active_window) - 1);
-        state.active_window[sizeof(state.active_window) - 1] = '\0';
+    const char *comma = strchr(w, ',');
+    if (comma) {
+        size_t class_len = comma - w;
+        if (class_len < sizeof(state.active_window_class)) {
+            memcpy(state.active_window_class, w, class_len);
+            state.active_window_class[class_len] = '\0';
+        }
+        strncpy(state.active_window_title, comma + 1,
+                sizeof(state.active_window_title) - 1);
+        state.active_window_title[sizeof(state.active_window_title) - 1] = '\0';
+    } else {
+        strncpy(state.active_window_class, w,
+                sizeof(state.active_window_class) - 1);
+        state.active_window_class[sizeof(state.active_window_class) - 1] = '\0';
+        state.active_window_title[0] = '\0';
     }
 }
+
 void Hypr::update_active_workspace(int id)
 {
     if (state.active_wsid != id) {
@@ -189,9 +202,10 @@ void Hypr::init_hypr_state()
 
     try {
         auto awin_json = json::parse(active_window_jsonstr);
-        snprintf(state.active_window, 108, "%s\x1F%s",
-                 awin_json["class"].get<std::string>().c_str(),
-                 awin_json["title"].get<std::string>().c_str());
+        strncpy(state.active_window_class,
+                awin_json["class"].get<std::string>().c_str(), 108);
+        strncpy(state.active_window_title,
+                awin_json["title"].get<std::string>().c_str(), 108);
 
         auto aws_json = json::parse(active_workspace_jsonstr);
         state.active_wsid = aws_json["id"];

@@ -43,6 +43,27 @@ void UI::draw(core::State &s)
     draw_container(rstart, rblocks);
 }
 
+/// TODO:: Trim text to 54-54 max based on format, 108 max in general
+/// FIXME:: Check daemon cuz, this should be trimmed on daemon side :(
+std::string format_window_text(std::optional<std::string> &format,
+                               std::string &active_window_class,
+                               std::string &active_window_title)
+{
+    std::string result;
+
+    if (format.has_value()) {
+        result = format.value();
+        result = std::regex_replace(result, std::regex("\\%class"),
+                                    active_window_class);
+        result = std::regex_replace(result, std::regex("\\%title"),
+                                    active_window_title);
+    } else {
+        result = std::string(active_window_class + " - " + active_window_title);
+    }
+
+    return result;
+}
+
 void UI::prepare_container(anchor a, float &start, std::vector<block> &blocks,
                            const core::State &s)
 {
@@ -51,7 +72,15 @@ void UI::prepare_container(anchor a, float &start, std::vector<block> &blocks,
     for (auto &it : blocks) {
         switch (it.t) {
             case WidgetType::WINDOW: {
-                prepare_text_block(it, s.hypr.active_window);
+                auto active_window_class =
+                    std::string(s.hypr.active_window_class);
+                auto active_window_title =
+                    std::string(s.hypr.active_window_title);
+                auto formatted_text = format_window_text(
+                    it.format, active_window_class, active_window_title);
+
+                prepare_text_block(it, formatted_text);
+
                 total_width += it.width;
                 break;
             }
@@ -110,39 +139,15 @@ void UI::draw_container(const float &start, std::vector<block> &blocks)
     }
 }
 
-/// TODO:: Trim text to 54-54 max based on format, 108 max in general
-/// FIXME:: Check daemon cuz, this should be trimmed on daemon side :(
-std::string format_window_text(std::optional<std::string> &format,
-                               std::string &text)
-{
-    std::string result;
-
-    if (format.has_value()) {
-        std::string input(text);
-        auto pos = input.find('\x1F');
-        auto class_name = input.substr(0, pos);
-        auto title = input.substr(pos + 1);
-
-        result = format.value();
-        result = std::regex_replace(result, std::regex("\\%class"), class_name);
-        result = std::regex_replace(result, std::regex("\\%title"), title);
-    } else {
-        result = std::string(text);
-    }
-
-    return result;
-}
-
 void UI::prepare_text_block(block &b, std::string text)
 {
-    auto formatted_text = format_window_text(b.format, text);
-    auto text_ext = r.theme_measure_text(formatted_text);
+    auto text_ext = r.theme_measure_text(text);
 
     b.width = text_ext.width + b.gap * 2;
     b.height = root.height;
     b.text_width = text_ext.width;
     b.text_height = text_ext.height;
-    b.text = formatted_text;
+    b.text = text;
 }
 
 void UI::draw_text_block(float &caret, block &b)
@@ -152,6 +157,7 @@ void UI::draw_text_block(float &caret, block &b)
     b.text_x = b.x + b.gap;
     b.text_y = b.height / 2 - b.text_height / 2;
 
+    /// TODO:: Draw only on hover!
     // r.theme_draw_rect(core::Rect{
     //     .x = b.x,
     //     .y = b.y,

@@ -32,7 +32,8 @@ int main()
     auto bar_height = config_root.height;
 
     core::State state;
-    strncpy(state.hypr.active_window, "", 108);
+    strncpy(state.hypr.active_window_class, "", 108);
+    strncpy(state.hypr.active_window_title, "", 108);
     core::WaylandContext wctx;
     core::Surface surface(wctx.get_compositor(), wctx.get_layer_shell(), 1920,
                           bar_height, [efd]() {

@@ -23,7 +23,8 @@ struct Hypr {
     int ws_count;
     int active_wsid;
     HyprWorkspace wss[MAX_HYPR_WS_AMOUNT];
-    char active_window[108];
+    char active_window_class[108];
+    char active_window_title[108];
     ErrorCode error_code;
 };
 
