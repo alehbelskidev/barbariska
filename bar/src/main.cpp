@@ -74,18 +74,27 @@ int main()
     auto ui = UI(r, config_left, config_center, config_right, config_root,
                  (float)surface_dimensions.bar_width);
 
+    auto finish_draw = [&r, &wctx]() {
+        r.draw_finish();
+        wl_display_flush(wctx.get_display());
+        wl_display_dispatch_pending(wctx.get_display());
+    };
+
     while (running) {
         wl_display_flush(wctx.get_display());
         poll(fds, 3, -1);
 
         if (ictx.get_is_hovering_surface()) {
             auto pointer_pos = ictx.get_pointer_position();
-            std::cout << "pointer pos x,y = " << pointer_pos.x << ","
-                      << pointer_pos.y << std::endl;
+            ui.hover(pointer_pos);
+            ui.draw(state);
+            finish_draw();
 
             if (ictx.is_button_pressed(0)) {
                 std::cout << "button presed 0" << std::endl;
             }
+        } else {
+            ui.reset_hover();
         }
 
         if (fds[0].revents & POLLIN) wl_display_dispatch(wctx.get_display());
@@ -94,10 +103,7 @@ int main()
             read(efd, &val, sizeof(val));
 
             ui.draw(state);
-            r.draw_finish();
-
-            wl_display_flush(wctx.get_display());
-            wl_display_dispatch_pending(wctx.get_display());
+            finish_draw();
         }
         if (fds[2].revents & POLLIN) c.poll_state();
     }

@@ -43,6 +43,35 @@ void UI::draw(core::State &s)
     draw_container(rstart, rblocks);
 }
 
+void mark_blocks_as_hovered(std::vector<block> &blocks,
+                            const core::vec2 &mouse_pos)
+{
+    for (auto &it : blocks) {
+        it.hovered = it.x <= mouse_pos.x && mouse_pos.x <= it.x + it.width;
+    }
+}
+
+void UI::hover(core::vec2 mouse_pos)
+{
+    mark_blocks_as_hovered(lblocks, mouse_pos);
+    mark_blocks_as_hovered(cblocks, mouse_pos);
+    mark_blocks_as_hovered(rblocks, mouse_pos);
+}
+
+void reset_all_blocks_hover(std::vector<block> &blocks)
+{
+    for (auto &it : blocks) {
+        it.hovered = false;
+    }
+}
+
+void UI::reset_hover()
+{
+    reset_all_blocks_hover(lblocks);
+    reset_all_blocks_hover(cblocks);
+    reset_all_blocks_hover(rblocks);
+}
+
 /// TODO:: Trim text to 54-54 max based on format, 108 max in general
 /// FIXME:: Check daemon cuz, this should be trimmed on daemon side :(
 std::string format_window_text(std::optional<std::string> &format,
@@ -157,18 +186,21 @@ void UI::draw_text_block(float &caret, block &b)
     b.text_x = b.x + b.gap;
     b.text_y = b.height / 2 - b.text_height / 2;
 
-    /// TODO:: Draw only on hover!
-    // r.theme_draw_rect(core::Rect{
-    //     .x = b.x,
-    //     .y = b.y,
-    //     .width = b.width,
-    //     .height = b.height,
-    // });
+    r.theme_draw_rect(
+        core::Rect{
+            .x = b.x,
+            .y = b.y,
+            .width = b.width,
+            .height = b.height,
+        },
+        b.hovered && b.hoverable);
 
-    r.theme_draw_text(b.text, core::Rect{
-                                  .x = b.text_x,
-                                  .y = b.text_y,
-                                  .width = b.text_width,
-                                  .height = b.text_height,
-                              });
+    r.theme_draw_text(b.text,
+                      core::Rect{
+                          .x = b.text_x,
+                          .y = b.text_y,
+                          .width = b.text_width,
+                          .height = b.text_height,
+                      },
+                      b.hovered && b.hoverable);
 }

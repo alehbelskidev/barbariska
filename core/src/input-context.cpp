@@ -81,7 +81,7 @@ void core::InputContext::handle_enter(wl_surface *surface, float x, float y)
 
 void core::InputContext::handle_leave(wl_surface *surface)
 {
-    is_hovering_surface = true;
+    is_hovering_surface = false;
 }
 
 void core::InputContext::handle_motion(float x, float y)

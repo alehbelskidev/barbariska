@@ -11,6 +11,7 @@ struct block {
     float x, y, width, height, gap;
     float text_x, text_y, text_width, text_height;
     bool hoverable;
+    bool hovered;
     WidgetType t;
     std::string text;
     std::optional<std::string> format;
@@ -21,6 +22,9 @@ public:
     UI(BarRenderer &r, std::vector<Widget> &left, std::vector<Widget> &center,
        std::vector<Widget> &right, Widget &root, float root_width);
     void draw(core::State &s);
+    void hover(core::vec2 mouse_pos);
+    void reset_hover();
+    /// TODO: click
 
 private:
     BarRenderer &r;
