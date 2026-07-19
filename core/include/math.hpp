@@ -1,7 +1,10 @@
 #pragma once
 
 namespace core {
-struct V2 {
+struct vec2 {
     double x, y;
+};
+struct vec3 : vec2 {
+    double z;
 };
 };  // namespace core

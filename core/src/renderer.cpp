@@ -50,19 +50,12 @@ void core::Renderer::draw_text(const char *text, core::Font font, core::RGBA fg,
 
 core::Size core::Renderer::measure_text(const char *text, core::Font font)
 {
-    cairo_surface_t *temp_surface =
-        cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1);
-    cairo_t *temp_cr = cairo_create(temp_surface);
-
-    cairo_select_font_face(temp_cr, font.family.c_str(),
-                           CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size(temp_cr, font.size);
-
+    cairo_save(cr);
+    cairo_select_font_face(cr, font.family.c_str(), CAIRO_FONT_SLANT_NORMAL,
+                           CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size(cr, font.size);
     cairo_text_extents_t ext;
-    cairo_text_extents(temp_cr, text, &ext);
-
-    cairo_destroy(temp_cr);
-    cairo_surface_destroy(temp_surface);
-
-    return core::Size{.width = (float)ext.width, .height = (float)ext.height};
+    cairo_text_extents(cr, text, &ext);
+    cairo_restore(cr);
+    return {(float)ext.width, (float)ext.height};
 }

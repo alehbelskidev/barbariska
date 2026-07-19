@@ -2,6 +2,7 @@
 
 #include <poll.h>
 
+#include <algorithm>
 #include <iostream>
 
 void core::WaylandContext::registry_global_cb(void *data, wl_registry *reg,
@@ -10,6 +11,7 @@ void core::WaylandContext::registry_global_cb(void *data, wl_registry *reg,
                                               uint32_t version)
 {
     auto *ctx = static_cast<WaylandContext *>(data);
+
     // Comparing interface names and biding what we need
     // wl_registry_bind ask object of a certain type from COMPOSITOR
     if (std::string_view(interface) == wl_compositor_interface.name) {
@@ -23,6 +25,9 @@ void core::WaylandContext::registry_global_cb(void *data, wl_registry *reg,
     {
         ctx->layer_shell = static_cast<zwlr_layer_shell_v1 *>(
             wl_registry_bind(reg, name, &zwlr_layer_shell_v1_interface, 1));
+    } else if (std::string_view(interface) == wl_seat_interface.name) {
+        ctx->seat = static_cast<wl_seat *>(
+            wl_registry_bind(reg, name, &wl_seat_interface, 1));
     }
 }
 
@@ -60,6 +65,13 @@ core::WaylandContext::WaylandContext()
 core::WaylandContext::~WaylandContext()
 {
     wl_display_disconnect(display);
+    if (compositor) wl_compositor_destroy(compositor);
+    if (shm) wl_shm_destroy(shm);
+    if (layer_shell) zwlr_layer_shell_v1_destroy(layer_shell);
+    if (seat) wl_seat_destroy(seat);
+
+    if (registry) wl_registry_destroy(registry);
+    if (display) wl_display_disconnect(display);
 }
 
 void core::WaylandContext::roundtrip()

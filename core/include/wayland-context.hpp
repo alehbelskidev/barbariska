@@ -39,6 +39,9 @@ private:
         .global_remove = registry_global_remove_cb,
     };
 
+    /// Wayland seat
+    wl_seat *seat = nullptr;
+
 public:
     WaylandContext();
     ~WaylandContext();
@@ -68,6 +71,11 @@ public:
     zwlr_layer_shell_v1 *get_layer_shell()
     {
         return layer_shell;
+    }
+
+    wl_seat *get_seat() const
+    {
+        return seat;
     }
 };
 }  // namespace core

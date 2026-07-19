@@ -25,10 +25,16 @@ void init_socket(int &fd, sockaddr_un &addr, std::string &path,
 
     addr = {};
     addr.sun_family = AF_UNIX;
-    memcpy(addr.sun_path, path.c_str(), sizeof(addr.sun_path) - 1);
-    addr.sun_path[sizeof(addr.sun_path) - 1] = '\0';
+
+    size_t path_len = path.length();
+    if (path_len >= sizeof(addr.sun_path)) {
+        path_len = sizeof(addr.sun_path) - 1;
+    }
+    memcpy(addr.sun_path, path.c_str(), path_len);
+    addr.sun_path[path_len] = '\0';
 
     unlink(path.c_str());
+
     if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
         close(fd);
         std::cerr << "D_ERROR: Failed to bind: " << errno << " path: " << path

@@ -32,6 +32,7 @@ protected:
     /// shm always synced
     cairo_t *cr;
     void flush();
+    cairo_font_face_t *font_face;
 
 public:
     Renderer(void *shm_data, CommitFn commit_cb,

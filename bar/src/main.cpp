@@ -35,6 +35,7 @@ int main()
     strncpy(state.hypr.active_window_class, "", 108);
     strncpy(state.hypr.active_window_title, "", 108);
     core::WaylandContext wctx;
+    core::InputContext ictx(wctx.get_seat());
     core::Surface surface(wctx.get_compositor(), wctx.get_layer_shell(), 1920,
                           bar_height, [efd]() {
                               uint64_t val = 1;
@@ -76,6 +77,17 @@ int main()
     while (running) {
         wl_display_flush(wctx.get_display());
         poll(fds, 3, -1);
+
+        if (ictx.get_is_hovering_surface()) {
+            auto pointer_pos = ictx.get_pointer_position();
+            std::cout << "pointer pos x,y = " << pointer_pos.x << ","
+                      << pointer_pos.y << std::endl;
+
+            if (ictx.is_button_pressed(0)) {
+                std::cout << "button presed 0" << std::endl;
+            }
+        }
+
         if (fds[0].revents & POLLIN) wl_display_dispatch(wctx.get_display());
         if (fds[1].revents & POLLIN) {
             uint64_t val;
