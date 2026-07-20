@@ -20,6 +20,8 @@ public:
     ~BarRenderer() = default;
 
     void theme_draw_rect(core::Rect rect, bool inverted = false);
+    void theme_draw_rect_rounded(core::Rect rect, bool inverted = false,
+                                 float roundness = 0);
     void theme_draw_text(std::string text, core::Rect r, bool inverted = false);
     core::Size theme_measure_text(std::string text);
 };

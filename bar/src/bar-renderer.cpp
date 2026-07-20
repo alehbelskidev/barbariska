@@ -8,6 +8,13 @@ void BarRenderer::theme_draw_rect(core::Rect rect, bool inverted)
     auto font = config.get_font();
     draw_rect(rect, inverted ? theme.fg : theme.bg);
 }
+void BarRenderer::theme_draw_rect_rounded(core::Rect rect, bool inverted,
+                                          float roundness)
+{
+    auto theme = config.get_theme();
+    auto font = config.get_font();
+    draw_rect_rounded(rect, inverted ? theme.fg : theme.bg, roundness);
+}
 
 void BarRenderer::theme_draw_text(std::string text, core::Rect r, bool inverted)
 {

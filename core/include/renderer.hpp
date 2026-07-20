@@ -40,6 +40,7 @@ public:
     virtual ~Renderer();
 
     void draw_rect(core::Rect r, core::RGBA bg);
+    void draw_rect_rounded(core::Rect r, core::RGBA bg, float roundness);
     void draw_text(const char *text, core::Font font, core::RGBA fg,
                    core::Rect r);
     core::Size measure_text(const char *text, core::Font font);

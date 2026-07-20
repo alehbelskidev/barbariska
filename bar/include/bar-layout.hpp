@@ -10,6 +10,7 @@ enum class anchor { LEFT, CENTER, RIGHT };
 struct block {
     float x, y, width, height, gap;
     float text_x, text_y, text_width, text_height;
+    float roundness;
     bool hoverable;
     bool hovered;
     WidgetType t;

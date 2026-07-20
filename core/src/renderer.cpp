@@ -1,5 +1,7 @@
 #include "renderer.hpp"
 
+#include <algorithm>
+
 #include "core.hpp"
 
 core::Renderer::Renderer(void *shm_data, CommitFn commit_cb,
@@ -32,6 +34,30 @@ void core::Renderer::draw_rect(core::Rect r, core::RGBA bg)
     cairo_rectangle(cr, r.x, r.y, r.width, r.height);
     cairo_fill(cr);
 }
+
+void core::Renderer::draw_rect_rounded(core::Rect r, core::RGBA bg,
+                                       float roundness)
+{
+    float max_radius = std::min(r.width, r.height) / 2.0;
+    float radius = std::min(roundness, max_radius);
+
+    cairo_new_sub_path(cr);
+
+    cairo_arc(cr, r.x + radius, r.y + radius, radius, M_PI,
+              3.0 * M_PI / 2.0);  /// topleft
+    cairo_arc(cr, r.x + r.width - radius, r.y + radius, radius,
+              3.0 * M_PI / 2.0, 2.0 * M_PI);  // topright
+    cairo_arc(cr, r.x + r.width - radius, r.y + r.height - radius, radius, 0.0,
+              M_PI / 2.0);  // bottomright
+    cairo_arc(cr, r.x + radius, r.y + r.height - radius, radius, M_PI / 2.0,
+              M_PI);  // bottomleft
+
+    cairo_close_path(cr);
+
+    cairo_set_source_rgba(cr, bg.r, bg.g, bg.b, bg.a);
+    cairo_fill(cr);
+}
+
 void core::Renderer::draw_text(const char *text, core::Font font, core::RGBA fg,
                                core::Rect r)
 {

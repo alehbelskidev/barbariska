@@ -10,6 +10,7 @@ void create_blocks_of_widgets(const std::vector<Widget> &in,
 {
     for (const auto &it : in) {
         out.push_back(block{.gap = it.gap,
+                            .roundness = it.roundness,
                             .hoverable = it.hoverable,
                             .t = it.t,
                             .format = it.format});
@@ -186,14 +187,19 @@ void UI::draw_text_block(float &caret, block &b)
     b.text_x = b.x + b.gap;
     b.text_y = b.height / 2 - b.text_height / 2;
 
-    r.theme_draw_rect(
-        core::Rect{
-            .x = b.x,
-            .y = b.y,
-            .width = b.width,
-            .height = b.height,
-        },
-        b.hovered && b.hoverable);
+    auto container_rect = core::Rect{
+        .x = b.x,
+        .y = b.y,
+        .width = b.width,
+        .height = b.height,
+    };
+
+    if (b.roundness > 0) {
+        r.theme_draw_rect_rounded(container_rect, b.hovered && b.hoverable,
+                                  b.roundness);
+    } else {
+        r.theme_draw_rect(container_rect, b.hovered && b.hoverable);
+    }
 
     r.theme_draw_text(b.text,
                       core::Rect{
