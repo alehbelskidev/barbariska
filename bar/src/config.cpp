@@ -7,124 +7,106 @@
 
 using namespace std::string_view_literals;
 
-WidgetType get_wtype_by_str(std::string str)
-{
-    if (str == "workspaces")
-        return WidgetType::WORKSPACES;
-    else if (str == "window")
-        return WidgetType::WINDOW;
-    else if (str == "clock")
-        return WidgetType::CLOCK;
-    else if (str == "wifi")
-        return WidgetType::WIFI;
-    else if (str == "volume")
-        return WidgetType::VOLUME;
-    else if (str == "disks")
-        return WidgetType::DISKS;
-    else if (str == "proc")
-        return WidgetType::PROC;
-    else if (str == "ram")
-        return WidgetType::RAM;
-    else if (str == "system")
-        return WidgetType::SYSTEM;
-    else
-        return WidgetType::UNKNOWN;
-}
-
-/*
-
-[root]
-height = 30
-padding = {x = 12, y = 4}
-
-[theme]
-bg = "#1e1e2e"
-fg = "#cdd6f4"
-accent = "#89b4fa"
-
-[font]
-family = "Iosevka Nerd Font"
-size = 20
-
-[modules]
-left = [ "workspaces", "window"  ]
-center = [ "clock", ]
-right = [ "wifi", "volume", "disks", "proc",  "ram", "system"]
-
-[wifi]
-levels = ["󰤭", "󰤯", "󰤟", "󰤢", "󰤥", "󰤨"]
-gap = 4
-padding = {x = 4, y = 4}
-
-[workspaces]
-gap = 4
-padding = {x = 4, y = 4}
-roundness = 0.2
-
-[window]
-format = "%class - %title"
-gap = 8
-padding = {x = 4, y = 4}
-roundness = 0.2
-hover = false
-
-[clock]
-format = "󰃰 %H:%M:%S, %d.%m.%Y"
-gap = 8
-padding = {x = 4, y = 4}
-roundness = 0.2
-hover = false
-*/
-
-void Config::parse_font()
-{
-    font.family = t["font"]["family"].value_or(""sv);
-    font.size = t["font"]["size"].value_or(14);
-}
-
-void Config::parse_theme()
-{
-    theme.bg = core::RGBA(t["theme"]["bg"].value_or("#000000"sv));
-    theme.fg = core::RGBA(t["theme"]["fg"].value_or("#ffffff"sv));
-    theme.accent = core::RGBA(t["theme"]["accent"].value_or("#000fff"sv));
-}
-
-Widget Config::parse_widget(std::string key)
+void Config::parse_widget(std::vector<WidgetVariant> &target, std::string key)
 {
     auto section = t[key];
-    auto wt = get_wtype_by_str(key);
-    Widget w;
-    w.t = wt;
 
-    if (wt == WidgetType::CLOCK || wt == WidgetType::WINDOW) {
-        w.format = section["format"].value_or(""sv);
-    }
-    if (wt == WidgetType::WIFI) {
-        if (auto *arr = section["levels"].as_array()) {
-            std::array<std::string, 6> tmp;
-            size_t i = 0;
-            for (auto &el : *arr) {
-                if (i >= 6) break;
-                tmp[i++] = el.value<std::string>().value_or("");
+    switch (key) {
+        case "workspaces": {
+            std::array<std::string, 9> icons;
+            if (auto *arr = section["icons"].as_array()) {
+                size_t i = 0;
+                for (auto &el : *arr) {
+                    if (i >= 9) break;
+                    icons[i++] =
+                        el.value<std::string>().value_or(std::string_view(i));
+                }
             }
-            w.levels = tmp;
+
+            std::array<std::string, 6> active_icons;
+            if (auto *arr = section["active_icons"].as_array()) {
+                size_t i = 0;
+                for (auto &el : *arr) {
+                    if (i >= 9) break;
+                    active_icons[i++] =
+                        el.value<std::string>().value_or(std::string_view(i));
+                }
+            }
+
+            target.emplace_back(WorkspacesWidget{
+                .t = WidgetType::WORKSPACES,
+                .padding_x = section["padding_x"].value_or(0.0),
+                .hoverable = section["hover"].value_or(false),
+                .gap = section["gap"].value_or(4.0),
+                .icons = icons,
+                .active_icons = icons,
+            });
+            break;
+        }
+        case "window": {
+            target.emplace_back(WindowWidget{
+                .t = WidgetType::WINDOW,
+                .padding_x = section["padding_x"].value_or(0.0),
+                .hoverable = section["hover"].value_or(false),
+                .format = section["format"].value_or("%title"sv),
+            });
+            break;
+        }
+        case "clock": {
+            target.emplace_back(ClockWidget{
+                .t = WidgetType::CLOCK,
+                .padding_x = section["padding_x"].value_or(0.0),
+                .hoverable = section["hover"].value_or(false),
+                .format = section["format"].value_or("%H:%M:%S, %d.%m.%Y"sv),
+            });
+            break;
+        }
+        case "wifi": {
+            std::array<std::string, 6> levels;
+            if (auto *arr = section["levels"].as_array()) {
+                size_t i = 0;
+                for (auto &el : *arr) {
+                    if (i >= 6) break;
+                    levels[i++] = el.value<std::string>().value_or(""sv);
+                }
+            }
+
+            target.emplace_back(WifiWidget{
+                .t = WidgetType::WIFI,
+                .padding_x = section["padding_x"].value_or(0.0),
+                .hoverable = section["hover"].value_or(false),
+                .levels = levels,
+                .format = section["format"].value_or("%signal%ssid"sv),
+            });
+            break;
+        }
+            // case "volume":
+            //     return WidgetType::VOLUME;
+            // case "disks":
+            //     return WidgetType::DISKS;
+            // case "proc":
+            //     return WidgetType::PROC;
+            // case "ram":
+            //     return WidgetType::RAM;
+            // case "system":
+            //     return WidgetType::SYSTEM;
+        default: {
+            target.emplace_back(UNKNOWN_WIDGET{
+                .t = WidgetType::UNKNOWN,
+                .padding_x = section["padding_x"].value_or(0.0),
+                .hoverable = section["hover"].value_or(false),
+            });
+            break;
         }
     }
-
-    w.gap = section["gap"].value_or(0);
-    w.roundness = section["roundness"].value_or(0.0);
-    w.hoverable = section["hover"].value_or(false);
-
-    return w;
 }
 
-void Config::parse_modules(std::vector<Widget> &target, std::string tkey)
+void Config::parse_modules(std::vector<WidgetVariant> &target, std::string tkey)
 {
     if (auto *arr = t["modules"][tkey].as_array()) {
         for (auto &el : *arr) {
             auto key = el.value<std::string>().value_or("");
-            auto widget = parse_widget(key);
-            target.push_back(widget);
+            parse_widget(target, key);
         }
     }
 }
@@ -138,10 +120,20 @@ Config::Config()
         t = toml::parse_file(configpath);
 
         root.height = t["root"]["height"].value_or(30.0);
-        root.gap = t["root"]["gap"].value_or(12.0);
+        root.roundness = t["root"]["roundness"].value_or(0.0);
+        root.padding.x = t["root"]["padding"]["x"].value_or(16.0);
+        root.padding.y = t["root"]["padding"]["y"].value_or(0.0);
 
-        parse_font();
-        parse_theme();
+        left_gaps = t["gaps"]["left"].value_or(4.0);
+        center_gaps = t["gaps"]["center"].value_or(4.0);
+        right_gaps = t["gaps"]["right"].value_or(4.0);
+
+        font.family = t["font"]["family"].value_or(""sv);
+        font.size = t["font"]["size"].value_or(14);
+
+        theme.bg = core::rgba(t["theme"]["bg"].value_or("#000000"sv));
+        theme.fg = core::rgba(t["theme"]["fg"].value_or("#ffffff"sv));
+        theme.accent = core::rgba(t["theme"]["accent"].value_or("#000fff"sv));
 
         parse_modules(left, "left");
         parse_modules(center, "center");

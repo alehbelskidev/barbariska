@@ -39,9 +39,9 @@ public:
              core::Surface::Dimensions surface_dimensions, int stride);
     virtual ~Renderer();
 
-    void draw_rect(core::Rect r, core::RGBA bg);
-    void draw_rect_rounded(core::Rect r, core::RGBA bg, float roundness);
-    void draw_text(const char *text, core::Font font, core::RGBA fg,
+    void draw_rect(core::Rect r, core::rgba bg);
+    void draw_rect_rounded(core::Rect r, core::rgba bg, float roundness);
+    void draw_text(const char *text, core::Font font, core::rgba fg,
                    core::Rect r);
     core::Size measure_text(const char *text, core::Font font);
 

@@ -1,24 +1,20 @@
 #pragma once
 
-#include <optional>
 #include <string>
+#include <variant>
 #include <vector>
 
 #include "core.hpp"
-#include "font.hpp"
-#include "math.hpp"
-#include "toml.hpp"
 
 #define BAR_CONFIG_PATH "/.config/barbariska/bar.toml"
 
 struct Theme {
-    core::RGBA bg, fg, accent;
+    core::rgba bg, fg, accent;
 };
 // const char *homedir = getenv("HOME");
 // snprintf(path, size, "%s%s", homedir, configdir);
 
 enum class WidgetType {
-    ROOT,
     WORKSPACES,
     WINDOW,
     CLOCK,
@@ -31,28 +27,51 @@ enum class WidgetType {
     UNKNOWN,
 };
 
-struct Widget {
-    WidgetType t;
-    float gap, roundness, height;
-    bool hoverable;
-    std::optional<std::string> format;
-    std::optional<std::array<std::string, 6>> levels;
+struct Root {
+    float width, height, roundness;
+    core::vec2 padding;
 };
+
+struct BaseWidget {
+    WidgetType t;
+    float padding_x;
+    bool hoverable;
+};
+
+struct WithFormatWidget : BaseWidget {
+    std::string format;
+};
+
+struct WifiWidget : WithFormatWidget {
+    std::array<std::string, 6> levels;
+};
+
+struct WorkspacesWidget : BaseWidget {
+    float gap;
+    std::array<std::string, 9> icons, active_icons;
+};
+
+struct WindowWidget : WithFormatWidget {};
+
+struct ClockWidget : WithFormatWidget {};
+
+struct UNKNOWN_WIDGET : BaseWidget {};
+
+using WidgetVariant = std::variant<WifiWidget, WorksapcesWidget, WindowWidget,
+                                   ClockWidget, UNKNOWN_WIDGET>;
 
 class Config {
 private:
-    Widget root;
-
     core::Font font;
     Theme theme;
-    std::vector<Widget> left, center, right;
+    Root root;
+    std::vector<WidgetVariant> left, center, right;
+    float left_gaps, center_gaps, right_gaps;
 
     toml::parse_result t;
 
-    void parse_font();
-    void parse_theme();
-    Widget parse_widget(std::string key);
-    void parse_modules(std::vector<Widget> &target, std::string tkey);
+    void parse_widget(std::vector<WidgetVariant> &target, std::string key);
+    void parse_modules(std::vector<WidgetVariant> &target, std::string tkey);
 
 public:
     Config();
@@ -66,21 +85,33 @@ public:
     {
         return theme;
     }
-    const Widget &get_root() const
+    const Root &get_root() const
     {
         return root;
     }
-    const std::vector<Widget> &get_left() const
+    const std::vector<WidgetVariant> &get_left() const
     {
         return left;
     }
-    const std::vector<Widget> &get_center() const
+    const std::vector<WidgetVariant> &get_center() const
     {
         return center;
     }
-    const std::vector<Widget> &get_right() const
+    const std::vector<WidgetVariant> &get_right() const
     {
         return right;
+    }
+    const float get_left_gaps() const
+    {
+        return left_gaps;
+    }
+    const float get_center_gaps() const
+    {
+        return center_gaps;
+    }
+    const float get_right_gaps() const
+    {
+        return right_gaps;
     }
 
     void _DEBUG_print() const;

@@ -4,12 +4,12 @@
 #include <string_view>
 
 namespace core {
-struct RGBA {
+struct rgba {
     double r = 0, g = 0, b = 0, a = 1;
 
-    RGBA() = default;
+    rgba() = default;
 
-    RGBA(std::string_view hex, double in_a = 1.0)
+    rgba(std::string_view hex, double in_a = 1.0)
     {
         auto s = hex.substr(1);
 
@@ -24,7 +24,7 @@ struct RGBA {
         a = s.size() >= 8 ? ch(6) : in_a;
     }
 
-    RGBA(double r, double g, double b, double a) : r(r), g(g), b(b), a(a)
+    rgba(double r, double g, double b, double a) : r(r), g(g), b(b), a(a)
     {
     }
 };

@@ -10,4 +10,5 @@
 #include "shm-buffer.hpp"
 #include "state.hpp"
 #include "surface.hpp"
+#include "toml.hpp"
 #include "wayland-context.hpp"

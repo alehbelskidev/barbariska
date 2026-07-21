@@ -28,14 +28,14 @@ void core::Renderer::flush()
     on_commit();
 }
 
-void core::Renderer::draw_rect(core::Rect r, core::RGBA bg)
+void core::Renderer::draw_rect(core::Rect r, core::rgba bg)
 {
     cairo_set_source_rgba(cr, bg.r, bg.g, bg.b, bg.a);
     cairo_rectangle(cr, r.x, r.y, r.width, r.height);
     cairo_fill(cr);
 }
 
-void core::Renderer::draw_rect_rounded(core::Rect r, core::RGBA bg,
+void core::Renderer::draw_rect_rounded(core::Rect r, core::rgba bg,
                                        float roundness)
 {
     float max_radius = std::min(r.width, r.height) / 2.0;
@@ -58,7 +58,7 @@ void core::Renderer::draw_rect_rounded(core::Rect r, core::RGBA bg,
     cairo_fill(cr);
 }
 
-void core::Renderer::draw_text(const char *text, core::Font font, core::RGBA fg,
+void core::Renderer::draw_text(const char *text, core::Font font, core::rgba fg,
                                core::Rect r)
 {
     cairo_set_source_rgba(cr, fg.r, fg.g, fg.b, fg.a);
