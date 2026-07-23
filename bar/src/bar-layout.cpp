@@ -1,29 +1,47 @@
 #include "bar-layout.hpp"
 
 #include <iostream>
+#include <optional>
 #include <regex>
+#include <variant>
+#include <vector>
 
 #include "bar-renderer.hpp"
 
-void create_blocks_of_widgets(const std::vector<Widget> &in,
-                              std::vector<block> &out)
+void create_blocks_of_widgets(const std::vector<WidgetVariant> &in,
+                              std::vector<block> &out, const Root &root)
 {
-    for (const auto &it : in) {
-        out.push_back(block{.gap = it.gap,
-                            .roundness = it.roundness,
-                            .hoverable = it.hoverable,
-                            .t = it.t,
-                            .format = it.format});
+    out.reserve(out.size() + in.size());
+
+    for (const auto &var : in) {
+        std::visit(
+            [&](const auto &widget) {
+                block b;
+
+                b.padding_x = widget.padding_x;
+                b.hoverable = widget.hoverable;
+                b.t = widget.t;
+                b.roundness = root.roundness;
+                b.y = root.padding.y;
+
+                if constexpr (requires { widget.format; }) {
+                    b.format = widget.format;
+                }
+
+                out.push_back(b);
+            },
+            var);
     }
 }
 
-UI::UI(BarRenderer &r, std::vector<Widget> &left, std::vector<Widget> &center,
-       std::vector<Widget> &right, Widget &root, float root_width)
-    : r(r), root(root), root_width(root_width)
+UI::UI(BarRenderer &r, const std::vector<WidgetVariant> &left,
+       const std::vector<WidgetVariant> &center,
+       const std::vector<WidgetVariant> &right, const Root &root)
+    : r(r), root(root)
 {
-    create_blocks_of_widgets(left, lblocks);
-    create_blocks_of_widgets(center, cblocks);
-    create_blocks_of_widgets(right, rblocks);
+    create_blocks_of_widgets(left, lblocks, root);
+    create_blocks_of_widgets(center, cblocks, root);
+    create_blocks_of_widgets(right, rblocks, root);
 }
 
 void UI::draw(core::State &s)
@@ -31,8 +49,8 @@ void UI::draw(core::State &s)
     r.theme_draw_rect(core::Rect{
         .x = 0,
         .y = 0,
-        .width = root_width,
-        .height = root.height,
+        .width = root.width,
+        .height = (float)root.height + (float)root.padding.y * 2,
     });
 
     prepare_container(anchor::LEFT, lstart, lblocks, s);
@@ -118,7 +136,6 @@ void UI::prepare_container(anchor a, float &start, std::vector<block> &blocks,
                 prepare_text_block(it, "UNKNOWN_WIDGET");
                 break;
             }
-            case WidgetType::ROOT:
             case WidgetType::WORKSPACES:
             case WidgetType::CLOCK:
             case WidgetType::WIFI:
@@ -133,13 +150,13 @@ void UI::prepare_container(anchor a, float &start, std::vector<block> &blocks,
 
     switch (a) {
         case anchor::LEFT:
-            start = root.gap;
+            start = root.padding.x;
             break;
         case anchor::CENTER:
-            start = (root_width - root.gap) / 2 - total_width / 2;
+            start = (root.width - root.padding.x * 2) / 2 - total_width / 2;
             break;
         case anchor::RIGHT:
-            start = root_width - root.gap - total_width;
+            start = root.width - root.padding.x - total_width;
             break;
     }
 }
@@ -153,9 +170,8 @@ void UI::draw_container(const float &start, std::vector<block> &blocks)
             case WidgetType::WINDOW:
             case WidgetType::UNKNOWN:
                 draw_text_block(caret, it);
-                caret += it.width;
+                caret += it.width + root.gaps;
                 break;
-            case WidgetType::ROOT:
             case WidgetType::WORKSPACES:
             case WidgetType::CLOCK:
             case WidgetType::WIFI:
@@ -173,19 +189,21 @@ void UI::prepare_text_block(block &b, std::string text)
 {
     auto text_ext = r.theme_measure_text(text);
 
-    b.width = text_ext.width + b.gap * 2;
+    b.y = root.padding.y;
+    b.width = text_ext.width + b.padding_x * 2;
     b.height = root.height;
+
     b.text_width = text_ext.width;
     b.text_height = text_ext.height;
+    b.text_y = b.y + (b.height - b.text_height) / 2;
+
     b.text = text;
 }
 
 void UI::draw_text_block(float &caret, block &b)
 {
     b.x = caret;
-    b.y = 0;
-    b.text_x = b.x + b.gap;
-    b.text_y = b.height / 2 - b.text_height / 2;
+    b.text_x = b.x + b.padding_x;
 
     auto container_rect = core::Rect{
         .x = b.x,

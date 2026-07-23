@@ -3,6 +3,7 @@
 #include <sys/eventfd.h>
 #include <unistd.h>
 
+#include <array>
 #include <csignal>
 #include <iostream>
 #include <memory>
@@ -27,24 +28,25 @@ int main()
     int efd = eventfd(0, EFD_CLOEXEC);
 
     Config config;
-    config._DEBUG_print();
-    auto config_root = config.get_root();
-    auto bar_height = config_root.height;
-
     core::State state;
+
     strncpy(state.hypr.active_window_class, "", 108);
     strncpy(state.hypr.active_window_title, "", 108);
+
     core::WaylandContext wctx;
     core::InputContext ictx(wctx.get_seat());
-    core::Surface surface(wctx.get_compositor(), wctx.get_layer_shell(), 1920,
-                          bar_height, [efd]() {
-                              uint64_t val = 1;
-                              write(efd, &val, sizeof(val));
-                          });
+    core::Surface surface(
+        wctx.get_compositor(), wctx.get_layer_shell(), 1920,
+        config.get_root().height + config.get_root().padding.y * 2, [efd]() {
+            uint64_t val = 1;
+            write(efd, &val, sizeof(val));
+        });
 
     wctx.roundtrip();
 
     auto surface_dimensions = surface.get_dimensions();
+    config.set_root_width(surface_dimensions.bar_width);
+
     core::ShmBuffer shm_buffer(surface_dimensions, wctx.get_shm());
     BarRenderer r(
         shm_buffer.get_shm_data(),
@@ -67,12 +69,8 @@ int main()
 
     auto theme = config.get_theme();
 
-    auto config_left = config.get_left();
-    auto config_center = config.get_center();
-    auto config_right = config.get_right();
-
-    auto ui = UI(r, config_left, config_center, config_right, config_root,
-                 (float)surface_dimensions.bar_width);
+    auto ui = UI(r, config.get_left(), config.get_center(), config.get_right(),
+                 config.get_root());
 
     auto finish_draw = [&r, &wctx]() {
         r.draw_finish();

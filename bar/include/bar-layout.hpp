@@ -8,8 +8,7 @@
 enum class anchor { LEFT, CENTER, RIGHT };
 
 struct block {
-    vec2 padding;
-    float x, y, width, height, gap;
+    float x, y, width, height, padding_x;
     float text_x, text_y, text_width, text_height;
     float roundness;
     bool hoverable;
@@ -21,9 +20,9 @@ struct block {
 
 class UI {
 public:
-    UI(BarRenderer &r, std::vector<WidgetVariant> &left,
-       std::vector<WidgetVariant> &center, std::vector<WidgetVariant> &right,
-       Root &root);
+    UI(BarRenderer &r, const std::vector<WidgetVariant> &left,
+       const std::vector<WidgetVariant> &center,
+       const std::vector<WidgetVariant> &right, const Root &root);
 
     void draw(core::State &s);
     void hover(core::vec2 mouse_pos);
@@ -32,8 +31,7 @@ public:
 
 private:
     BarRenderer &r;
-    Widget &root;
-    float root_width;
+    const Root &root;
 
     std::vector<block> lblocks;
     float lstart;

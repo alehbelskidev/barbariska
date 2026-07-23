@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <string>
 #include <variant>
 #include <vector>
@@ -28,36 +29,36 @@ enum class WidgetType {
 };
 
 struct Root {
-    float width, height, roundness;
+    float width, height, roundness, gaps;
     core::vec2 padding;
 };
-
 struct BaseWidget {
     WidgetType t;
     float padding_x;
     bool hoverable;
 };
 
-struct WithFormatWidget : BaseWidget {
+struct WithFormatWidget : public BaseWidget {
     std::string format;
 };
 
-struct WifiWidget : WithFormatWidget {
+struct WifiWidget : public WithFormatWidget {
     std::array<std::string, 6> levels;
 };
 
-struct WorkspacesWidget : BaseWidget {
+struct WorkspacesWidget : public BaseWidget {
     float gap;
-    std::array<std::string, 9> icons, active_icons;
+    std::array<std::string, 9> icons;
+    std::array<std::string, 9> active_icons;
 };
 
-struct WindowWidget : WithFormatWidget {};
+struct WindowWidget : public WithFormatWidget {};
 
-struct ClockWidget : WithFormatWidget {};
+struct ClockWidget : public WithFormatWidget {};
 
-struct UNKNOWN_WIDGET : BaseWidget {};
+struct UNKNOWN_WIDGET : public BaseWidget {};
 
-using WidgetVariant = std::variant<WifiWidget, WorksapcesWidget, WindowWidget,
+using WidgetVariant = std::variant<WifiWidget, WorkspacesWidget, WindowWidget,
                                    ClockWidget, UNKNOWN_WIDGET>;
 
 class Config {
@@ -66,7 +67,6 @@ private:
     Theme theme;
     Root root;
     std::vector<WidgetVariant> left, center, right;
-    float left_gaps, center_gaps, right_gaps;
 
     toml::parse_result t;
 
@@ -85,6 +85,10 @@ public:
     {
         return theme;
     }
+    const void set_root_width(float width)
+    {
+        root.width = width;
+    }
     const Root &get_root() const
     {
         return root;
@@ -101,18 +105,4 @@ public:
     {
         return right;
     }
-    const float get_left_gaps() const
-    {
-        return left_gaps;
-    }
-    const float get_center_gaps() const
-    {
-        return center_gaps;
-    }
-    const float get_right_gaps() const
-    {
-        return right_gaps;
-    }
-
-    void _DEBUG_print() const;
 };
