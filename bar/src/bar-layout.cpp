@@ -173,7 +173,8 @@ void UI::prepare_container(anchor a, float &start, std::vector<block> &blocks,
             start = (root.width - root.padding.x * 2) / 2 - total_width / 2;
             break;
         case anchor::RIGHT:
-            start = root.width - root.padding.x - total_width;
+            start = root.width - root.padding.x - total_width -
+                    (blocks.size() * (root.gaps - 1));
             break;
     }
 }

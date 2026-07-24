@@ -106,7 +106,7 @@ void BSocket::accept_client(core::State &state)
 void BSocket::broadcast(core::State &state)
 {
     std::erase_if(clientfds, [&](int cfd) {
-        auto ret = write(cfd, &state, sizeof(state));
+        auto ret = send(cfd, &state, sizeof(state), MSG_NOSIGNAL);
         return ret != sizeof(core::State);
     });
 }
