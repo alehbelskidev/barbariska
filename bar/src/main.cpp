@@ -53,13 +53,18 @@ int main()
         [&surface, &shm_buffer]() { surface.commit(shm_buffer.get_buffer()); },
         surface_dimensions, shm_buffer.get_stride(), config);
 
-    core::Client c([&state, efd](core::State &new_state) {
+    bool redraw_pending = false;
+
+    core::Client c([&state, efd, &redraw_pending](core::State &new_state) {
         state = new_state;
-        uint64_t val = 1;
-        write(efd, &val, sizeof(val));
+        if (!redraw_pending) {
+            redraw_pending = true;
+            uint64_t val = 1;
+            write(efd, &val, sizeof(val));
+        }
     });
 
-    pollfd fds[3];
+    pollfd fds[4];
     fds[0].fd = wl_display_get_fd(wctx.get_display());
     fds[0].events = POLLIN;
     fds[1].fd = efd;
@@ -99,11 +104,14 @@ int main()
         if (fds[1].revents & POLLIN) {
             uint64_t val;
             read(efd, &val, sizeof(val));
-
+            redraw_pending = false;
             ui.draw(state);
             finish_draw();
         }
-        if (fds[2].revents & POLLIN) c.poll_state();
+
+        if (fds[2].revents & POLLIN) {
+            c.poll_state();
+        }
     }
 
     close(efd);

@@ -1,5 +1,6 @@
 #include "bar-layout.hpp"
 
+#include <ctime>
 #include <iostream>
 #include <optional>
 #include <regex>
@@ -112,6 +113,19 @@ std::string format_window_text(std::optional<std::string> &format,
     return result;
 }
 
+std::string format_clock_text(std::optional<std::string> &format, time_t time)
+{
+    std::tm tm;
+    localtime_r(&time, &tm);
+
+    std::string effective_fmt =
+        format.has_value() ? format.value() : "%Y-%m-%d %H:%M:%S";
+
+    std::vector<char> buf(256);
+    std::strftime(buf.data(), buf.size(), effective_fmt.c_str(), &tm);
+    return std::string(buf.data());
+}
+
 void UI::prepare_container(anchor a, float &start, std::vector<block> &blocks,
                            const core::State &s)
 {
@@ -128,16 +142,18 @@ void UI::prepare_container(anchor a, float &start, std::vector<block> &blocks,
                     it.format, active_window_class, active_window_title);
 
                 prepare_text_block(it, formatted_text);
-
-                total_width += it.width;
                 break;
             }
             case WidgetType::UNKNOWN: {
                 prepare_text_block(it, "UNKNOWN_WIDGET");
                 break;
             }
+            case WidgetType::CLOCK: {
+                auto clock_text = format_clock_text(it.format, s.timestamp);
+                prepare_text_block(it, clock_text);
+                break;
+            }
             case WidgetType::WORKSPACES:
-            case WidgetType::CLOCK:
             case WidgetType::WIFI:
             case WidgetType::VOLUME:
             case WidgetType::DISKS:
@@ -146,6 +162,7 @@ void UI::prepare_container(anchor a, float &start, std::vector<block> &blocks,
             case WidgetType::SYSTEM:
                 break;
         }
+        total_width += it.width;
     }
 
     switch (a) {
@@ -168,12 +185,13 @@ void UI::draw_container(const float &start, std::vector<block> &blocks)
     for (auto &it : blocks) {
         switch (it.t) {
             case WidgetType::WINDOW:
+            case WidgetType::CLOCK:
             case WidgetType::UNKNOWN:
                 draw_text_block(caret, it);
-                caret += it.width + root.gaps;
+                caret += it.width;
+                if (blocks.size() > 1) caret += root.gaps;
                 break;
             case WidgetType::WORKSPACES:
-            case WidgetType::CLOCK:
             case WidgetType::WIFI:
             case WidgetType::VOLUME:
             case WidgetType::DISKS:
